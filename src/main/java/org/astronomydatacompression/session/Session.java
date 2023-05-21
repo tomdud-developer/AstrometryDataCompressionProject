@@ -30,7 +30,7 @@ public class Session implements Runnable {
         SESSION_ID = generateSessionId();
     }
     private String generateSessionId() {
-        Random random = new Random(5000);
+        Random random = new Random();
         String randomLong = String.valueOf(random.nextLong(10000L, 1000000000L));
         String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
 

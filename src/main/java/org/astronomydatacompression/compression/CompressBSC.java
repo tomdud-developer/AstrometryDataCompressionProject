@@ -8,10 +8,10 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.logging.Level;
 
-public class CompressM03 extends Compress {
+public class CompressBSC extends Compress {
 
-    public CompressM03(File file, Path workingDirectoryPath) {
-        super(file, workingDirectoryPath, CompressMethod.M03);
+    public CompressBSC(File file, Path workingDirectoryPath) {
+        super(file, workingDirectoryPath, CompressMethod.BSC);
     }
 
     @Override
@@ -20,10 +20,10 @@ public class CompressM03 extends Compress {
                 .getPath("")
                 .toAbsolutePath()
                 .toString();
-        String command = userDirectory + "\\Compressors\\m03\\M03.exe";
+        String command = userDirectory + "\\Compressors\\bsc\\bsc.exe";
 
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command, "e", "100b", getFile().getPath(), getCompressedFileNameWithPath().toString());
+            ProcessBuilder processBuilder = new ProcessBuilder(command, "e", getFile().getPath(), getCompressedFileNameWithPath().toString());
             Process process = processBuilder.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

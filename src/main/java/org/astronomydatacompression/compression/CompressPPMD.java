@@ -5,14 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
-public class CompressM03 extends Compress {
 
-    public CompressM03(File file, Path workingDirectoryPath) {
-        super(file, workingDirectoryPath, CompressMethod.M03);
+public class CompressPPMD extends Compress {
+
+    public CompressPPMD(File file, Path workingDirectoryPath) {
+        super(file, workingDirectoryPath, CompressMethod.PPMD);
     }
+
 
     @Override
     public File compress() {
@@ -20,10 +24,12 @@ public class CompressM03 extends Compress {
                 .getPath("")
                 .toAbsolutePath()
                 .toString();
-        String command = userDirectory + "\\Compressors\\m03\\M03.exe";
+        String command = userDirectory + "\\Compressors\\ppmdi2\\PPMd.exe";
 
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command, "e", "100b", getFile().getPath(), getCompressedFileNameWithPath().toString());
+            Files.copy(getFile().toPath(), Path.of(userDirectory + "\\" + getFile().getName()));
+            ProcessBuilder processBuilder = new ProcessBuilder(command, "e", "-f" + getCompressedFileName(), getFile().getName());
+            processBuilder.command().forEach(System.out::println);
             Process process = processBuilder.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -41,13 +47,20 @@ public class CompressM03 extends Compress {
 
             int exitCode = process.exitValue();
             if (exitCode == 0) {
-                System.out.println("Thread method " + getMethod() + "was ended");
+                System.out.println("Thread method " + getMethod() + " was ended");
             } else {
-                System.out.println("Thread method " + getMethod() + "was ended with error code" + exitCode);
+                System.out.println("Thread method " + getMethod() + " was ended with error code" + exitCode);
             }
+
+            Files.delete(Path.of(userDirectory + "\\" + getFile().getName()));
+            Files.move(Path.of(userDirectory + "\\" + getCompressedFileName()), Paths.get(getWorkingDirectoryPath().toString(), getCompressedFileName()));
+
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+
+
 
         return null;
     }
