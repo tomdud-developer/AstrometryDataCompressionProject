@@ -8,8 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Flow implements Runnable {
+    private static final Logger logger = Logger.getLogger(Flow.class.getName());
 
     private final Scanner scanner;
     private final Session session;
@@ -24,6 +27,7 @@ public class Flow implements Runnable {
         writeSessionInformation();
         getTheDirectoryInformation();
         getMethodsToUse();
+        decideToStart();
     }
 
     private void writeStartInformation() {
@@ -53,16 +57,31 @@ public class Flow implements Runnable {
 
     private void getMethodsToUse() {
         System.out.println("Methods signature: 0.M03 ");
-        System.out.println("To start data compression write methods signatures (0,1,2,3), to stop write -1");
+        System.out.println("Before start data compression write methods signatures (0,1,2,3), to start all methods write (all), to stop write (exit)");
         String command = scanner.nextLine();
-        if(command.equals("-1"))
+        List<CompressMethod> methodsList = null;
+        if(command.equals("exit")) {
             System.exit(0);
-        List<CompressMethod> methodsList = Arrays.stream(command.split(","))
-                .map(Integer::parseInt)
-                .map(i ->CompressMethod.values()[i])
-                .toList();
+        } else if(command.equals("all")) {
+            methodsList = Arrays.stream(CompressMethod.values()).toList();
+        } else {
+            methodsList = Arrays.stream(command.split(","))
+                    .map(Integer::parseInt)
+                    .map(i -> CompressMethod.values()[i])
+                    .toList();
+        }
         session.setMethodsList(methodsList);
-        System.out.println("Methods: ");
-        methodsList.forEach((method) -> System.out.print(method.toString() + "  "));
+        String chosenMethodsInfo = "Chosen Methods: " + methodsList.stream().map(Enum::toString).reduce((info, x) -> info += x).get();
+        logger.log(Level.INFO, chosenMethodsInfo);
+    }
+
+    private void decideToStart() {
+        System.out.println("To start write 'start', to stop 'exit'");
+        String command = scanner.nextLine();
+        if(command.equals("exit"))
+            System.exit(0);
+
+        Thread sessionThread = new Thread(session);
+        sessionThread.start();
     }
 }

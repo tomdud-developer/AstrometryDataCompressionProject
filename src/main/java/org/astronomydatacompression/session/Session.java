@@ -1,5 +1,6 @@
 package org.astronomydatacompression.session;
 
+import org.astronomydatacompression.compression.Compress;
 import org.astronomydatacompression.compression.CompressMethod;
 
 import java.io.File;
@@ -12,8 +13,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class Session {
+public class Session implements Runnable {
+
+    private static final Logger logger = Logger.getLogger(Session.class.getName());
 
     private final String SESSION_ID;
     private Path workingDirectoryPath;
@@ -69,13 +74,26 @@ public class Session {
         return methodsList;
     }
 
+    @Override
+    public void run() {
+        logger.log(Level.INFO, "Session was started.");
+        logger.log(Level.INFO, "Create Compression Threads.");
+        try {
+            for (CompressMethod compressMethod : methodsList) {
+                Compress compress = compressMethod.getCompressClass().getDeclaredConstructor(File.class).newInstance(fileToCompress);
+                Thread compressThread = new Thread(compress);
+                compressThread.start();
+            }
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 /*     try {
         for (CompressMethod method : methodsList) {
             method.getCompressClass().getDeclaredConstructor().newInstance(session.getFileToCompress());
         }
-    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-        throw new RuntimeException(e);
-    }*/
+   */
 
 
 
