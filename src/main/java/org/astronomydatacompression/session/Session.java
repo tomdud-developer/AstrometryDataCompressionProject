@@ -5,6 +5,7 @@ import org.astronomydatacompression.compression.CompressMethod;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,10 +78,11 @@ public class Session implements Runnable {
     @Override
     public void run() {
         logger.log(Level.INFO, "Session was started.");
+        createWorkingDirectory();
         logger.log(Level.INFO, "Create Compression Threads.");
         try {
             for (CompressMethod compressMethod : methodsList) {
-                Compress compress = compressMethod.getCompressClass().getDeclaredConstructor(File.class).newInstance(fileToCompress);
+                Compress compress = compressMethod.getCompressClass().getDeclaredConstructor(File.class, Path.class).newInstance(fileToCompress, workingDirectoryPath);
                 Thread compressThread = new Thread(compress);
                 compressThread.start();
             }
@@ -89,12 +91,16 @@ public class Session implements Runnable {
         }
     }
 
-/*     try {
-        for (CompressMethod method : methodsList) {
-            method.getCompressClass().getDeclaredConstructor().newInstance(session.getFileToCompress());
+    private void createWorkingDirectory() {
+        String folderName = getSESSION_ID();
+        try {
+            Path folderPath = Paths.get(workingDirectoryPath.toString(), folderName);
+            Files.createDirectory(folderPath);
+            logger.log(Level.INFO, "Created new folder with name " + folderPath);
+            workingDirectoryPath = folderPath;
+        } catch (Exception e) {
+            System.out.println("Folder creation error. " + e.getMessage());
         }
-   */
-
-
+    }
 
 }
