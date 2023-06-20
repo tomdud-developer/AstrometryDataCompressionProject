@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class PropertiesLoader implements PropertiesLoaderInterface {
 
@@ -55,7 +53,23 @@ public class PropertiesLoader implements PropertiesLoaderInterface {
     }
 
     @Override
-    public List<String> getListOfValuesByKey(PropertiesType type, String key) {
+    public List<String> getListOfValuesSepratedByComma(PropertiesType type, String key) {
         return Arrays.stream(getValueByKey(type, key).split(",")).toList();
     }
+
+    public List<String> getListOfValuesDefinedInArray(PropertiesType type, String key) {
+        List<String> listOfValues = new ArrayList<>();
+        int i = 0;
+
+        String value = getValueByKey(type, String.format(key + "[%d]", i));
+        while(value != null) {
+            listOfValues.add(value);
+            i++;
+            value = getValueByKey(type, String.format(key + "[%d]", i));
+        }
+
+        return listOfValues;
+    }
+
+
 }
