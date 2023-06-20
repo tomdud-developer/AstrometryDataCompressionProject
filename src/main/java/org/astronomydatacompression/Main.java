@@ -1,10 +1,7 @@
 package org.astronomydatacompression;
 
 import org.astronomydatacompression.session.Flow;
-import org.astronomydatacompression.session.Session;
-
-import java.io.InputStream;
-import java.util.Scanner;
+import org.astronomydatacompression.session.UserPathFlow;
 
 public class Main {
     public static void main(String[] args) {
