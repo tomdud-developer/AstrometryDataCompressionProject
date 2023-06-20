@@ -1,5 +1,5 @@
 package org.astronomydatacompression.properties;
 
-public enum Properties {
+public enum PropertiesType {
     EXTERNAL, INTERNAL
 }
