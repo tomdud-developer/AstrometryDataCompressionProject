@@ -14,7 +14,7 @@ public class PropertiesLoader implements PropertiesLoaderInterface {
     public static final PropertiesLoader INSTANCE = new PropertiesLoader();
 
     private final String INTERNAL_PROPERTIES_FILE_NAME = "application.properties";
-    private final String EXTERNAL_PROPERTIES_FILE_NAME = "application.properties";
+    private final String EXTERNAL_PROPERTIES_FILE_NAME = "external.properties";
     private Properties internalProperties;
     private Properties externalProperties;
     private PropertiesLoader() {
