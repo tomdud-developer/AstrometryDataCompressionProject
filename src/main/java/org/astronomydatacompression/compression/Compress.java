@@ -55,6 +55,7 @@ public abstract class Compress implements Compressable, Runnable {
 
             ProcessBuilder processBuilder = new ProcessBuilder(commands);
             processBuilder.directory(getWorkingDirectoryPath().toFile());
+            System.out.println(processBuilder.directory().getPath());
 
             Process process = processBuilder.start();
 
