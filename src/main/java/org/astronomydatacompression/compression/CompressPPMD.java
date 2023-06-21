@@ -1,5 +1,8 @@
 package org.astronomydatacompression.compression;
 
+import org.astronomydatacompression.properties.PropertiesLoader;
+import org.astronomydatacompression.properties.PropertiesType;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +17,15 @@ import java.util.logging.Level;
 public class CompressPPMD extends Compress {
 
     public CompressPPMD(File file, Path workingDirectoryPath) {
-        super(file, workingDirectoryPath, CompressMethod.PPMD);
+        super(
+                file,
+                workingDirectoryPath,
+                Paths.get(
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.folderName"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.executableFileName")
+                ).toFile(),
+                CompressMethod.PPMD);
     }
 
 

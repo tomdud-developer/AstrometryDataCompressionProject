@@ -11,11 +11,13 @@ public abstract class Compress implements Compressable, Runnable {
     private final CompressMethod compressMethod;
     private final File file;
     private final Path workingDirectoryPath;
+    private final File compressorFile;
     protected static final Logger logger = Logger.getLogger(Compress.class.getName());
 
-    public Compress(File file, Path workingDirectoryPath, CompressMethod compressMethod) {
+    public Compress(File file, Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod) {
         this.compressMethod = compressMethod;
         this.workingDirectoryPath = workingDirectoryPath;
+        this.compressorFile = compressorFile;
         this.file = file;
     }
 
@@ -37,5 +39,9 @@ public abstract class Compress implements Compressable, Runnable {
 
     public Path getCompressedFileNameWithPath() {
         return Paths.get(workingDirectoryPath.toString(), getCompressedFileName());
+    }
+
+    public File getCompressorFile() {
+        return compressorFile;
     }
 }

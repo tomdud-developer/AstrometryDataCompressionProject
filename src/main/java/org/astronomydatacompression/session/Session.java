@@ -106,6 +106,9 @@ public class Session implements Runnable {
             Files.createDirectory(folderPath);
             logger.log(Level.INFO, "Created new folder with name " + folderPath);
             workingDirectoryPath = folderPath;
+
+            folderPath = Paths.get(workingDirectoryPath.toString(), "logs");
+            Files.createDirectory(folderPath);
         } catch (Exception e) {
             System.out.println("Folder creation error. " + e.getMessage());
         }

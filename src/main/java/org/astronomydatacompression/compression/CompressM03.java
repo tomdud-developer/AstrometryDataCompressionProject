@@ -1,17 +1,29 @@
 package org.astronomydatacompression.compression;
 
+import org.astronomydatacompression.properties.PropertiesLoader;
+import org.astronomydatacompression.properties.PropertiesType;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
 public class CompressM03 extends Compress {
 
     public CompressM03(File file, Path workingDirectoryPath) {
-        super(file, workingDirectoryPath, CompressMethod.M03);
+        super(
+                file,
+                workingDirectoryPath,
+                Paths.get(
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.folderName"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.executableFileName")
+                ).toFile(),
+                CompressMethod.M03);
     }
 
     @Override

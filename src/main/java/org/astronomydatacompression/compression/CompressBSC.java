@@ -1,36 +1,54 @@
 package org.astronomydatacompression.compression;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.astronomydatacompression.properties.PropertiesLoader;
+import org.astronomydatacompression.properties.PropertiesType;
+
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
 public class CompressBSC extends Compress {
 
     public CompressBSC(File file, Path workingDirectoryPath) {
-        super(file, workingDirectoryPath, CompressMethod.BSC);
+        super(
+                file,
+                workingDirectoryPath,
+                Paths.get(
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.folderName"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.executableFileName")
+                ).toFile(),
+                CompressMethod.BSC);
     }
 
     @Override
     public File compress() {
-        String userDirectory = FileSystems.getDefault()
-                .getPath("")
-                .toAbsolutePath()
-                .toString();
-        String command =  "Compressors\\bsc\\bsc.exe";
+        String[] commands = new String[] {
+                getCompressorFile().getPath(),
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.compressCommand"),
+                getFile().getPath(),
+                getCompressedFileName()
+        };
 
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command, "e", getFile().getPath(), getCompressedFileNameWithPath().toString());
+
+
+            ProcessBuilder processBuilder = new ProcessBuilder(commands);
+            processBuilder.directory(getWorkingDirectoryPath().toFile());
 
             Process process = processBuilder.start();
 
+            File logFile = Paths.get(getWorkingDirectoryPath().toString(), "logs", getMethod().toString() + "_logs").toFile();
+            if(!logFile.createNewFile()) throw new RuntimeException("Error when create new log file");
+
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile.getPath()));
             while ((line = reader.readLine()) != null) {
-                //System.out.println("Wyjście: " + line);
+                writer.write(line);
             }
 
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -42,9 +60,9 @@ public class CompressBSC extends Compress {
 
             int exitCode = process.exitValue();
             if (exitCode == 0) {
-                System.out.println("Thread method " + getMethod() + "was ended");
+                System.out.println("Thread method " + getMethod() + " was ended");
             } else {
-                System.out.println("Thread method " + getMethod() + "was ended with error code" + exitCode);
+                System.out.println("Thread method " + getMethod() + " was ended with error code " + exitCode);
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
