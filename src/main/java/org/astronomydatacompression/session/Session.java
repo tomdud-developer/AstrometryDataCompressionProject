@@ -2,6 +2,8 @@ package org.astronomydatacompression.session;
 
 import org.astronomydatacompression.compression.Compress;
 import org.astronomydatacompression.compression.CompressMethod;
+import org.astronomydatacompression.properties.PropertiesLoader;
+import org.astronomydatacompression.properties.PropertiesType;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -28,14 +31,14 @@ public class Session implements Runnable {
 
     public Session() {
         SESSION_ID = generateSessionId();
+        setMethodsList();
     }
     private String generateSessionId() {
         Random random = new Random();
         String randomLong = String.valueOf(random.nextLong(10000L, 1000000000L));
         String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
 
-        return
-                "SESSION_ID_" + randomLong + "_" + date;
+        return "SESSION_ID_" + randomLong + "_" + date;
     }
 
     public String getSESSION_ID() {
@@ -67,7 +70,12 @@ public class Session implements Runnable {
         }
     }
 
-    public void setMethodsList(List<CompressMethod> methodsList) {
+    private void setMethodsList() {
+        List<String> methodsStringList = PropertiesLoader.INSTANCE.getListOfValuesSepratedByComma(PropertiesType.EXTERNAL, "session.methods");
+        List<CompressMethod> methodsList = new ArrayList<>();
+        for (String methodName: methodsStringList) {
+            methodsList.add(CompressMethod.valueOf(methodName));
+        }
         this.methodsList = methodsList;
     }
 
@@ -101,6 +109,19 @@ public class Session implements Runnable {
         } catch (Exception e) {
             System.out.println("Folder creation error. " + e.getMessage());
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("""
+                        ### Session informations ###
+                        Your session ID is %s
+                        Working directory: %s
+                        File to compress: %s
+                        Chosen Methods: %s""",
+                SESSION_ID, workingDirectoryPath, fileToCompress.getPath(),
+                methodsList.stream().map(Enum::toString).reduce((info, x) -> info += x).get()
+        );
     }
 
 }
