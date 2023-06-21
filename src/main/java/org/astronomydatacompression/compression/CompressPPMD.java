@@ -11,6 +11,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Level;
 
 
@@ -22,56 +23,32 @@ public class CompressPPMD extends Compress {
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
-                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.folderName"),
-                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.executableFileName")
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.folderName"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.executableFileName")
                 ).toFile(),
                 CompressMethod.PPMD);
     }
 
-
     @Override
     public File compress() {
-        String userDirectory = FileSystems.getDefault()
-                .getPath("")
-                .toAbsolutePath()
-                .toString();
-        String command = userDirectory + "\\Compressors\\ppmdi2\\PPMd.exe";
-
         try {
-            Files.copy(getFile().toPath(), Path.of(userDirectory + "\\" + getFile().getName()));
-            ProcessBuilder processBuilder = new ProcessBuilder(command, "e", "-f" + getCompressedFileName(), getFile().getName());
-            processBuilder.command().forEach(System.out::println);
-            Process process = processBuilder.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                //System.out.println("Wyjście: " + line);
-            }
-
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while ((line = errorReader.readLine()) != null) {
-                System.err.println("Błąd: " + line);
-            }
-
-            process.waitFor();
-
-            int exitCode = process.exitValue();
-            if (exitCode == 0) {
-                System.out.println("Thread method " + getMethod() + " was ended");
-            } else {
-                System.out.println("Thread method " + getMethod() + " was ended with error code" + exitCode);
-            }
-
-            Files.delete(Path.of(userDirectory + "\\" + getFile().getName()));
-            Files.move(Path.of(userDirectory + "\\" + getCompressedFileName()), Paths.get(getWorkingDirectoryPath().toString(), getCompressedFileName()));
-
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getFile().getName()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        String[] options = PropertiesLoader.INSTANCE.getListOfValuesDefinedInArray(
+                PropertiesType.EXTERNAL, "compressors.ppmd.options").toArray(new String[0]);
+        String[] commands = new String[3 + options.length + 1];
+        commands[0] = getCompressorFile().getPath();
+        commands[1] = PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.compressCommand");
+        commands[2] = "-f" + getCompressedFileName();
+
+        System.arraycopy(options, 0, commands, 3, options.length);
+
+        commands[3 + options.length] = getFile().getName();
 
 
+        compressorRunner(commands);
 
         return null;
     }
