@@ -32,41 +32,7 @@ public class CompressBSC extends Compress {
                 getCompressedFileName()
         };
 
-        try {
-
-
-            ProcessBuilder processBuilder = new ProcessBuilder(commands);
-            processBuilder.directory(getWorkingDirectoryPath().toFile());
-
-            Process process = processBuilder.start();
-
-            File logFile = Paths.get(getWorkingDirectoryPath().toString(), "logs", getMethod().toString() + "_logs").toFile();
-            if(!logFile.createNewFile()) throw new RuntimeException("Error when create new log file");
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-
-            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile.getPath()));
-            while ((line = reader.readLine()) != null) {
-                writer.write(line);
-            }
-
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while ((line = errorReader.readLine()) != null) {
-                System.err.println("Błąd: " + line);
-            }
-
-            process.waitFor();
-
-            int exitCode = process.exitValue();
-            if (exitCode == 0) {
-                System.out.println("Thread method " + getMethod() + " was ended");
-            } else {
-                System.out.println("Thread method " + getMethod() + " was ended with error code " + exitCode);
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        compressorRunner(commands);
 
         return null;
     }
