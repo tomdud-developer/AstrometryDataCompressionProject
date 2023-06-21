@@ -20,16 +20,17 @@ public class CompressBSC extends Compress {
                 .getPath("")
                 .toAbsolutePath()
                 .toString();
-        String command = userDirectory + "\\Compressors\\bsc\\bsc.exe";
+        String command =  "Compressors\\bsc\\bsc.exe";
 
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command, "e", getFile().getPath(), getCompressedFileNameWithPath().toString());
+
             Process process = processBuilder.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println("Wyjście: " + line);
+                //System.out.println("Wyjście: " + line);
             }
 
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));

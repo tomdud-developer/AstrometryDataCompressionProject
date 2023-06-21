@@ -35,7 +35,7 @@ public class CompressPPMD extends Compress {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println("Wyjście: " + line);
+                //System.out.println("Wyjście: " + line);
             }
 
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));

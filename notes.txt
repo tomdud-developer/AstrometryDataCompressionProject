@@ -1,0 +1,35 @@
+
+###########   BSC   ############
+Usage: bsc <e|d> inputfile outputfile <options>
+
+Block sorting options:
+  -b<size> Block size in megabytes, default: -b25
+             minimum: -b1, maximum: -b1024
+  -m<algo> Block sorting algorithm, default: -m0
+             -m0 Burrows Wheeler Transform (default)
+             -m3..8 Sort Transform of order n
+  -c<ctx>  Contexts for sorting, default: -cf
+             -cf Following contexts (default)
+             -cp Preceding contexts
+             -ca Autodetect (experimental)
+  -e<algo> Entropy encoding algorithm, default: -e1
+             -e1 Static Quantized Local Frequency Coding (default)
+             -e2 Adaptive Quantized Local Frequency Coding (best compression)
+
+Preprocessing options:
+  -p       Disable all preprocessing techniques
+  -s       Enable segmentation (adaptive block size), default: disable
+  -r       Enable structured data reordering, default: disable
+  -l       Enable Lempel-Ziv preprocessing, default: enable
+  -H<size> LZP dictionary size in bits, default: -H16
+             minimum: -H10, maximum: -H28
+  -M<size> LZP minimum match length, default: -M128
+             minimum: -M4, maximum: -M255
+
+Platform specific options:
+  -G       Enable Sort Transform acceleration on NVIDIA GPU, default: disable
+  -P       Enable large 2MB RAM pages, default: disable
+  -t       Disable parallel blocks processing, default: enable
+  -T       Disable multi-core systems support, default: enable
+
+Options may be combined into one, like -b128p -m5e1
