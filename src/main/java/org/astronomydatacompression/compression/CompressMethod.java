@@ -6,7 +6,8 @@ public enum CompressMethod {
     BSC(CompressorBSC.class),
     GZIP(CompressorGZIP.class),
     MCM(CompressorMCM.class),
-    ZSTD(CompressorZSTD.class);
+    ZSTD(CompressorZSTD.class),
+    SEVEN_Z(Compressor7Z.class);
 
     private final Class<? extends Compressor> compressClass;
 

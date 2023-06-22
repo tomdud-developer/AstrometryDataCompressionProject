@@ -32,7 +32,7 @@ public abstract class Compressor implements Compressable, Runnable {
         return workingDirectoryPath;
     }
     public String getCompressedFileName() {
-        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString();
+        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString() + "." + file.getName().split("\\.")[1];
     }
 
     public Path getCompressedFileNameWithPath() {
