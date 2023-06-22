@@ -4,7 +4,9 @@ public enum CompressMethod {
     M03(CompressorM03.class),
     PPMD(CompressorPPMD.class),
     BSC(CompressorBSC.class),
-    GZIP(CompressorGZIP.class);
+    GZIP(CompressorGZIP.class),
+    MCM(CompressorMCM.class),
+    ZSTD(CompressorZSTD.class);
 
     private final Class<? extends Compressor> compressClass;
 
