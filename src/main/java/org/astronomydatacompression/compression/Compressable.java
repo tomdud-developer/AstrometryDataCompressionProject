@@ -1,9 +1,12 @@
 package org.astronomydatacompression.compression;
 
+import org.astronomydatacompression.statistics.CompressionStatistics;
+
 import java.io.File;
+import java.io.IOException;
 
 public interface Compressable {
-    File compress();
+    CompressionStatistics compress() throws IOException;
     File deCompress();
 
     CompressMethod getMethod();

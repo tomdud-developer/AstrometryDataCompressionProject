@@ -2,6 +2,7 @@ package org.astronomydatacompression.compression;
 
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class CompressorPPMD extends Compressor {
     }
 
     @Override
-    public File compress() {
+    public CompressionStatistics compress() throws IOException {
         try {
             Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getFile().getName()));
         } catch (IOException e) {
@@ -44,9 +45,9 @@ public class CompressorPPMD extends Compressor {
         commands[3 + options.length] = getFile().getName();
 
 
-        compressorRunner(commands);
+        long compressionTime = compressorRunner(commands);
 
-        return null;
+        return new CompressionStatistics(compressionTime, Files.size(getFile().toPath()));
     }
 
     @Override
@@ -57,6 +58,10 @@ public class CompressorPPMD extends Compressor {
     @Override
     public void run() {
         logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        compress();
+        try {
+            System.out.println(compress());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

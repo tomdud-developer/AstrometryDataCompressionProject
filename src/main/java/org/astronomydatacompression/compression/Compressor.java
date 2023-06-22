@@ -43,7 +43,7 @@ public abstract class Compressor implements Compressable, Runnable {
         return compressorFile;
     }
 
-    protected void compressorRunner(String[] commands) {
+    protected long compressorRunner(String[] commands) {
         BufferedReader reader = null;
         BufferedWriter writer = null;
 
@@ -54,6 +54,8 @@ public abstract class Compressor implements Compressable, Runnable {
             ProcessBuilder processBuilder = new ProcessBuilder(commands);
             processBuilder.directory(getWorkingDirectoryPath().toFile());
             System.out.println(processBuilder.directory().getPath());
+
+            long startTime = System.nanoTime();
 
             Process process = processBuilder.start();
 
@@ -74,12 +76,16 @@ public abstract class Compressor implements Compressable, Runnable {
 
             process.waitFor();
 
+            long endTime = System.nanoTime() - startTime;
+
             int exitCode = process.exitValue();
             if (exitCode == 0) {
                 System.out.println("Thread method " + getMethod() + " was ended");
             } else {
                 System.out.println("Thread method " + getMethod() + " was ended with error code " + exitCode);
             }
+
+            return endTime;
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -91,6 +97,8 @@ public abstract class Compressor implements Compressable, Runnable {
                 throw new RuntimeException(e);
             }
         }
+
+        throw new RuntimeException();
     }
 
     public String addStrBeforeDotInFileName(File file, String addedStrBeforeDot) {

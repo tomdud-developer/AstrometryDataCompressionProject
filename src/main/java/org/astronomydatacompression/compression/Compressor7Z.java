@@ -2,6 +2,7 @@ package org.astronomydatacompression.compression;
 
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class Compressor7Z extends Compressor {
     }
 
     @Override
-    public File compress() {
+    public CompressionStatistics compress() throws IOException {
         Path copiedFilePath = null;
         try {
             copiedFilePath = Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getCompressedFileName()));
@@ -42,9 +43,9 @@ public class Compressor7Z extends Compressor {
                 copiedFilePath.toString()
         };
 
-        compressorRunner(commands);
+        long compressionTime = compressorRunner(commands);
 
-        return null;
+        return new CompressionStatistics(compressionTime, Files.size(getFile().toPath()));
     }
 
     @Override
@@ -55,6 +56,10 @@ public class Compressor7Z extends Compressor {
     @Override
     public void run() {
         logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        compress();
+        try {
+            System.out.println(compress());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

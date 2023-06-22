@@ -2,8 +2,11 @@ package org.astronomydatacompression.compression;
 
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -23,7 +26,7 @@ public class CompressorM03 extends Compressor {
     }
 
     @Override
-    public File compress() {
+    public CompressionStatistics compress() throws IOException {
         String[] commands = new String[] {
                 getCompressorFile().getPath(),
                 PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.compressCommand"),
@@ -32,9 +35,9 @@ public class CompressorM03 extends Compressor {
                 getCompressedFileName()
         };
 
-        compressorRunner(commands);
+        long compressionTime = compressorRunner(commands);
 
-        return null;
+        return new CompressionStatistics(compressionTime, Files.size(getFile().toPath()));
     }
 
     @Override
@@ -45,6 +48,10 @@ public class CompressorM03 extends Compressor {
     @Override
     public void run() {
         logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        compress();
+        try {
+            System.out.println(compress());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -2,6 +2,7 @@ package org.astronomydatacompression.compression;
 
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -25,7 +26,7 @@ public class CompressorGZIP extends Compressor {
     }
 
     @Override
-    public File compress() {
+    public CompressionStatistics compress() throws IOException {
         Path pathToCopiedFile = null;
         try {
             pathToCopiedFile = Files.copy(
@@ -42,9 +43,9 @@ public class CompressorGZIP extends Compressor {
                 pathToCopiedFile.toString()
         };
 
-        compressorRunner(commands);
+        long compressionTime = compressorRunner(commands);
 
-        return null;
+        return new CompressionStatistics(compressionTime, Files.size(getFile().toPath()));
     }
 
     @Override
@@ -55,7 +56,11 @@ public class CompressorGZIP extends Compressor {
     @Override
     public void run() {
         logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        compress();
+        try {
+            System.out.println(compress());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
