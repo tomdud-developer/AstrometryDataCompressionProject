@@ -3,20 +3,16 @@ package org.astronomydatacompression.compression;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CompressTest {
 
     @Test
     void compressM03() {
         File file = new File("Workspace\\data.txt");
-        Compress compress = new CompressM03(file, Paths.get("Workspace\\"));
-        File compressedFile = compress.compress();
+        Compressor compressor = new CompressorM03(file, Paths.get("Workspace\\"));
+        File compressedFile = compressor.compress();
 
 
 /*        try {
@@ -33,8 +29,8 @@ class CompressTest {
                 .toAbsolutePath()
                 .toString();
         File file = new File(userDirectory + "\\Workspace\\data.txt");
-        Compress compress = new CompressPPMD(file, Paths.get(userDirectory,"\\Workspace\\"));
-        compress.compress();
+        Compressor compressor = new CompressorPPMD(file, Paths.get(userDirectory,"\\Workspace\\"));
+        compressor.compress();
     }
 
 }

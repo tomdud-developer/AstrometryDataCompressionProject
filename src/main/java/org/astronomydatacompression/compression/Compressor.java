@@ -1,20 +1,18 @@
 package org.astronomydatacompression.compression;
 
-import org.astronomydatacompression.session.Session;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
-public abstract class Compress implements Compressable, Runnable {
+public abstract class Compressor implements Compressable, Runnable {
     private final CompressMethod compressMethod;
     private final File file;
     private final Path workingDirectoryPath;
     private final File compressorFile;
-    protected static final Logger logger = Logger.getLogger(Compress.class.getName());
+    protected static final Logger logger = Logger.getLogger(Compressor.class.getName());
 
-    public Compress(File file, Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod) {
+    public Compressor(File file, Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod) {
         this.compressMethod = compressMethod;
         this.workingDirectoryPath = workingDirectoryPath;
         this.compressorFile = compressorFile;
@@ -93,6 +91,19 @@ public abstract class Compress implements Compressable, Runnable {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public String addStrBeforeDotInFileName(File file, String addedStrBeforeDot) {
+        String fileName = file.getName();
+        String extension = "";
+
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0) {
+            extension = fileName.substring(dotIndex);
+            fileName = fileName.substring(0, dotIndex);
+        }
+
+        return fileName + addedStrBeforeDot + extension;
     }
 
 }

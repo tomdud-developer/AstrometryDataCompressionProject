@@ -3,37 +3,43 @@ package org.astronomydatacompression.compression;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.FileSystems;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 
-public class CompressM03 extends Compress {
 
-    public CompressM03(File file, Path workingDirectoryPath) {
+public class CompressorGZIP extends Compressor {
+
+    public CompressorGZIP(File file, Path workingDirectoryPath) {
         super(
                 file,
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
-                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.folderName"),
-                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.executableFileName")
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.folderName"),
+                        PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.executableFileName")
                 ).toFile(),
-                CompressMethod.M03);
+                CompressMethod.GZIP);
     }
 
     @Override
     public File compress() {
+        Path pathToCopiedFile = null;
+        try {
+            pathToCopiedFile = Files.copy(
+                    getFile().toPath(),
+                    getWorkingDirectoryPath().resolve(
+                            addStrBeforeDotInFileName(getFile(), "_gzip"))
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         String[] commands = new String[] {
                 getCompressorFile().getPath(),
-                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.compressCommand"),
-                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.blockSize"),
-                getFile().getPath(),
-                getCompressedFileName()
+                pathToCopiedFile.toString()
         };
 
         compressorRunner(commands);
@@ -52,3 +58,4 @@ public class CompressM03 extends Compress {
         compress();
     }
 }
+

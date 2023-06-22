@@ -1,6 +1,6 @@
 package org.astronomydatacompression.session;
 
-import org.astronomydatacompression.compression.Compress;
+import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -90,8 +89,8 @@ public class Session implements Runnable {
         logger.log(Level.INFO, "Create Compression Threads.");
         try {
             for (CompressMethod compressMethod : methodsList) {
-                Compress compress = compressMethod.getCompressClass().getDeclaredConstructor(File.class, Path.class).newInstance(fileToCompress, workingDirectoryPath);
-                Thread compressThread = new Thread(compress);
+                Compressor compressor = compressMethod.getCompressClass().getDeclaredConstructor(File.class, Path.class).newInstance(fileToCompress, workingDirectoryPath);
+                Thread compressThread = new Thread(compressor);
                 compressThread.start();
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -120,7 +119,7 @@ public class Session implements Runnable {
                         ### Session informations ###
                         Your session ID is %s
                         Working directory: %s
-                        File to compress: %s
+                        File to compressor: %s
                         Chosen Methods: %s""",
                 SESSION_ID, workingDirectoryPath, fileToCompress.getPath(),
                 methodsList.stream().map(Enum::toString).reduce((info, x) -> info += x).get()

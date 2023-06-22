@@ -1,17 +1,18 @@
 package org.astronomydatacompression.compression;
 
 public enum CompressMethod {
-    M03(CompressM03.class),
-    PPMD(CompressPPMD.class),
-    BSC(CompressBSC.class);
+    M03(CompressorM03.class),
+    PPMD(CompressorPPMD.class),
+    BSC(CompressorBSC.class),
+    GZIP(CompressorGZIP.class);
 
-    private final Class<? extends Compress> compressClass;
+    private final Class<? extends Compressor> compressClass;
 
-    CompressMethod(Class<? extends Compress> compressClass) {
+    CompressMethod(Class<? extends Compressor> compressClass) {
         this.compressClass = compressClass;
     }
 
-    public Class<? extends Compress> getCompressClass() {
+    public Class<? extends Compressor> getCompressClass() {
         return compressClass;
     }
 }

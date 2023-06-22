@@ -4,14 +4,13 @@ import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 
 import java.io.*;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 
-public class CompressBSC extends Compress {
+public class CompressorBSC extends Compressor {
 
-    public CompressBSC(File file, Path workingDirectoryPath) {
+    public CompressorBSC(File file, Path workingDirectoryPath) {
         super(
                 file,
                 workingDirectoryPath,
