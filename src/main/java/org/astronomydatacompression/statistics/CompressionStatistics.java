@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Date;
 
-@AllArgsConstructor
 @Getter
 public class CompressionStatistics {
     private final CompressMethod compressMethod;
