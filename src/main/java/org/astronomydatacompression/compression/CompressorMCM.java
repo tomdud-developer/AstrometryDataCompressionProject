@@ -41,7 +41,15 @@ public class CompressorMCM extends Compressor {
 
         long compressionTime = compressorRunner(commands);
 
-        return new CompressionStatistics(compressionTime, Files.size(getFile().toPath()));
+        File compressedFile = new File(getCompressedFileNameWithPath().toUri());
+        if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
+        
+        return new CompressionStatistics(
+                getMethod(),
+                getFile(),
+                compressionTime,
+                compressedFile
+        );
     }
 
     @Override
@@ -51,7 +59,7 @@ public class CompressorMCM extends Compressor {
 
     @Override
     public void run() {
-        logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
+        System.out.println("Start compress method in " + getMethod().toString() + " Thread.");
         try {
             System.out.println(compress());
         } catch (IOException e) {

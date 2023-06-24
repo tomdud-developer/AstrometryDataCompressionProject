@@ -111,19 +111,6 @@ public abstract class Compressor implements Compressable, Runnable {
         throw new RuntimeException();
     }
 
-    public String addStrBeforeDotInFileName(File file, String addedStrBeforeDot) {
-        String fileName = file.getName();
-        String extension = "";
-
-        int dotIndex = fileName.lastIndexOf(".");
-        if (dotIndex > 0) {
-            extension = fileName.substring(dotIndex);
-            fileName = fileName.substring(0, dotIndex);
-        }
-
-        return fileName + addedStrBeforeDot + extension;
-    }
-
     public Path copyFileToCompressToSessionWorkingDirectoryAndSetMethodName() {
         Path copiedFilePath = null;
         try {

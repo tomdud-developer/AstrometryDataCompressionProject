@@ -38,7 +38,15 @@ public class CompressorM03 extends Compressor {
 
         long compressionTime = compressorRunner(commands);
 
-        return new CompressionStatistics(compressionTime, Files.size(getFile().toPath()));
+        File compressedFile = new File(getCompressedFileNameWithPath().toUri());
+        if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
+        
+        return new CompressionStatistics(
+                getMethod(),
+                getFile(),
+                compressionTime,
+                compressedFile
+        );
     }
 
     @Override
