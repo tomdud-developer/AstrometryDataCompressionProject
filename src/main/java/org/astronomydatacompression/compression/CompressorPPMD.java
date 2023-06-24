@@ -9,14 +9,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 
 
 public class CompressorPPMD extends Compressor {
 
-    public CompressorPPMD(File file, Path workingDirectoryPath) {
+    public CompressorPPMD(File defaultFileToCompress, Path workingDirectoryPath) {
+        this(workingDirectoryPath);
+        setFileToCompress(defaultFileToCompress);
+    }
+
+    public CompressorPPMD(Path workingDirectoryPath) {
         super(
-                file,
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
@@ -28,9 +31,12 @@ public class CompressorPPMD extends Compressor {
     }
 
     @Override
-    public CompressionStatistics compress() throws IOException {
+    public CompressionStatistics compress(File file) throws IOException {
+        
+        setFileToCompress(file);
+
         try {
-            Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getFile().getName()));
+            Files.copy(getFileToCompress().toPath(), getWorkingDirectoryPath().resolve(getFileToCompress().getName()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -43,17 +49,17 @@ public class CompressorPPMD extends Compressor {
 
         System.arraycopy(options, 0, commands, 3, options.length);
 
-        commands[3 + options.length] = getFile().getName();
+        commands[3 + options.length] = getFileToCompress().getName();
 
 
-        long compressionTime = compressorRunner(commands);
+        long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
 
         File compressedFile = new File(getCompressedFileNameWithPath().toUri());
         if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
         
         return new CompressionStatistics(
                 getMethod(),
-                getFile(),
+                getFileToCompress(),
                 compressionTime,
                 compressedFile
         );
@@ -64,13 +70,5 @@ public class CompressorPPMD extends Compressor {
         return null;
     }
 
-    @Override
-    public void run() {
-        logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        try {
-            System.out.println(compress());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }

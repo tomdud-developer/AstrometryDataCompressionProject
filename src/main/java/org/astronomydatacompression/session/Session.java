@@ -4,6 +4,7 @@ import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +28,9 @@ public class Session implements Runnable {
     private Path workingDirectoryPath;
     private File fileToCompress;
     List<CompressMethod> methodsList;
+    private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
+    private final List<Compressor> compressors = new ArrayList<>();
+
 
     public Session() {
         SESSION_ID = generateSessionId();
@@ -84,18 +88,37 @@ public class Session implements Runnable {
 
     @Override
     public void run() {
-        logger.log(Level.INFO, "Session was started.");
+        System.out.println(String.format("Session %s was started.", SESSION_ID));
         createWorkingDirectory();
-        logger.log(Level.INFO, "Create Compression Threads.");
+        System.out.println("Create Compression Threads.");
+        List<Thread> threads = new ArrayList<>();
+
         try {
             for (CompressMethod compressMethod : methodsList) {
                 Compressor compressor = compressMethod.getCompressClass().getDeclaredConstructor(File.class, Path.class).newInstance(fileToCompress, workingDirectoryPath);
+                compressors.add(compressor);
                 Thread compressThread = new Thread(compressor);
                 compressThread.start();
+                threads.add(compressThread);
             }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+
+            for (Thread thread : threads) {
+                thread.join();
+            }
+
+            System.out.println("All threads have ended. Collect statistics.");
+            collectStatisticsFromCompressors();
+            compressionStatistics.forEach(System.out::println);
+
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void collectStatisticsFromCompressors() {
+        compressors.forEach(
+                compressor -> compressionStatistics.add(compressor.getCompressionStatistics())
+        );
     }
 
     private void createWorkingDirectory() {
@@ -103,10 +126,13 @@ public class Session implements Runnable {
         try {
             Path folderPath = Paths.get(workingDirectoryPath.toString(), folderName);
             Files.createDirectory(folderPath);
-            logger.log(Level.INFO, "Created new folder with name " + folderPath);
+            System.out.println("Created new folder with name " + folderPath);
             workingDirectoryPath = folderPath;
 
-            folderPath = Paths.get(workingDirectoryPath.toString(), "logs");
+            folderPath = Paths.get(workingDirectoryPath.toString(), "logs_" + Compressor.Operation.COMPRESSION);
+            Files.createDirectory(folderPath);
+
+            folderPath = Paths.get(workingDirectoryPath.toString(), "logs_" + Compressor.Operation.DECOMPRESSION);
             Files.createDirectory(folderPath);
         } catch (Exception e) {
             System.out.println("Folder creation error. " + e.getMessage());

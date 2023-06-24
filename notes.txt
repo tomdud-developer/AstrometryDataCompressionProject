@@ -33,3 +33,17 @@ Platform specific options:
   -T       Disable multi-core systems support, default: enable
 
 Options may be combined into one, like -b128p -m5e1
+
+
+
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\bsc\bsc.exe d .\data_compressed_BSC.txt .\data_compressed_BSC_deco.txt
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\gzip\gzip.exe -dk .\GaiaSource_000-000-036_compressed_GZIP.csv.gz   //It produces GaiaSource_000-000-036_compressed_GZIP.csv
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\m03\M03.exe d .\data_compressed_M03.txt .\data_decompressed_M03.txt
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\mcm83\mcm.exe d .\data_compressed_MCM.txt .\data_decompressed_MCM.txt
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\ppmdi2\PPMd.exe d .\data_compressed_PPMD.txt    //It generate org name file data.txt, it must be changes in safe way?
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\xz-5.2.1-windows\bin_x86-64\xz.exe -dk .\GaiaSource_000-000-036_compressed_SEVEN_Z.csv.xz  //It produce GaiaSource_000-000-036_compressed_SEVEN_Z.csv
+C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\Compressors\zstd-v1.5.5-win64\zstd.exe -dk .\GaiaSource_000-000-036_compressed_ZSTD.csv.zst -o .\GaiaSource_000-000-036_decompressed_ZSTD.csv
+
+ok 9s.
+
+

@@ -20,6 +20,7 @@ public class CompressionStatistics {
     private final File compressedFile;
 
     private final double inputSizeInMB;
+    private final double outputSizeInMB;
 
     public CompressionStatistics(
             CompressMethod compressMethod,
@@ -33,7 +34,8 @@ public class CompressionStatistics {
         this.compressedFile = compressedFile;
 
         try {
-            inputSizeInMB = Files.size(inputFile.toPath());
+            inputSizeInMB = Files.size(inputFile.toPath()) / 1000.0;
+            outputSizeInMB = Files.size(compressedFile.toPath()) / 1000.0;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -47,10 +49,11 @@ public class CompressionStatistics {
     public String toString() {
         return String.format(
                 """
-                Compression Time: %d ns
                 Input File Size: %f B
+                Compression Time: %d ns
+                Output File Size: %f B
                 """,
-                compressionTimeInNs, inputSizeInMB);
+                inputSizeInMB, compressionTimeInNs, outputSizeInMB);
     }
 
 

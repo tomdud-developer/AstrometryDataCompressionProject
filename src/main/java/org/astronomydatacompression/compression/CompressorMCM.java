@@ -6,16 +6,18 @@ import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 
 public class CompressorMCM extends Compressor {
 
-    public CompressorMCM(File file, Path workingDirectoryPath) {
+    public CompressorMCM(File defaultFileToCompress, Path workingDirectoryPath) {
+        this(workingDirectoryPath);
+        setFileToCompress(defaultFileToCompress);
+    }
+
+    public CompressorMCM(Path workingDirectoryPath) {
         super(
-                file,
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
@@ -27,7 +29,9 @@ public class CompressorMCM extends Compressor {
     }
 
     @Override
-    public CompressionStatistics compress() throws IOException {
+    public CompressionStatistics compress(File file) throws IOException {
+
+        setFileToCompress(file);
 
         String[] options = PropertiesLoader.INSTANCE.getListOfValuesDefinedInArray(
                 PropertiesType.EXTERNAL, "compressors.mcm.options").toArray(new String[0]);
@@ -35,18 +39,18 @@ public class CompressorMCM extends Compressor {
         String[] commands = new String[] {
                 getCompressorFile().getPath(),
                 options[0],
-                getFile().getPath(),
+                getFileToCompress().getPath(),
                 getCompressedFileNameWithEndExtension()
         };
 
-        long compressionTime = compressorRunner(commands);
+        long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
 
         File compressedFile = new File(getCompressedFileNameWithPath().toUri());
         if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
         
         return new CompressionStatistics(
                 getMethod(),
-                getFile(),
+                getFileToCompress(),
                 compressionTime,
                 compressedFile
         );
@@ -57,13 +61,5 @@ public class CompressorMCM extends Compressor {
         return null;
     }
 
-    @Override
-    public void run() {
-        System.out.println("Start compress method in " + getMethod().toString() + " Thread.");
-        try {
-            System.out.println(compress());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }

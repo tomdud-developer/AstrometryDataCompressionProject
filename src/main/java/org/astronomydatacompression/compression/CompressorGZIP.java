@@ -8,14 +8,17 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 
 
 public class CompressorGZIP extends Compressor {
 
-    public CompressorGZIP(File file, Path workingDirectoryPath) {
+    public CompressorGZIP(File defaultFileToCompress, Path workingDirectoryPath) {
+        this(workingDirectoryPath);
+        setFileToCompress(defaultFileToCompress);
+    }
+
+    public CompressorGZIP(Path workingDirectoryPath) {
         super(
-                file,
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
@@ -26,12 +29,14 @@ public class CompressorGZIP extends Compressor {
                 PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.defaultExtension"));
     }
 
-    @Override
-    public CompressionStatistics compress() throws IOException {
+        @Override
+    public CompressionStatistics compress(File file) throws IOException {
+        
+        setFileToCompress(file);
         Path pathToCopiedFile = null;
         try {
             pathToCopiedFile = Files.copy(
-                    getFile().toPath(),
+                    getFileToCompress().toPath(),
                     getWorkingDirectoryPath().resolve(
                             getCompressedFileNameWithoutEndExtension()
                     )
@@ -45,14 +50,14 @@ public class CompressorGZIP extends Compressor {
                 pathToCopiedFile.toString()
         };
 
-        long compressionTime = compressorRunner(commands);
+        long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
 
         File compressedFile = new File(getCompressedFileNameWithPath().toUri());
         if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
         
         return new CompressionStatistics(
                 getMethod(),
-                getFile(),
+                getFileToCompress(),
                 compressionTime,
                 compressedFile
         );
@@ -63,14 +68,6 @@ public class CompressorGZIP extends Compressor {
         return null;
     }
 
-    @Override
-    public void run() {
-        logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        try {
-            System.out.println(compress());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }
 

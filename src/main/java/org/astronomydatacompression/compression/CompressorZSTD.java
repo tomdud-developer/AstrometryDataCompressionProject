@@ -6,16 +6,18 @@ import org.astronomydatacompression.statistics.CompressionStatistics;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 
 public class CompressorZSTD extends Compressor {
 
-    public CompressorZSTD(File file, Path workingDirectoryPath) {
+    public CompressorZSTD(File defaultFileToCompress, Path workingDirectoryPath) {
+        this(workingDirectoryPath);
+        setFileToCompress(defaultFileToCompress);
+    }
+
+    public CompressorZSTD(Path workingDirectoryPath) {
         super(
-                file,
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
@@ -27,7 +29,9 @@ public class CompressorZSTD extends Compressor {
     }
 
     @Override
-    public CompressionStatistics compress() throws IOException {
+    public CompressionStatistics compress(File file) throws IOException {
+
+        setFileToCompress(file);
 
         String[] options = PropertiesLoader.INSTANCE.getListOfValuesDefinedInArray(
                 PropertiesType.EXTERNAL, "compressors.zstd.options").toArray(new String[0]);
@@ -35,19 +39,19 @@ public class CompressorZSTD extends Compressor {
         String[] commands = new String[] {
                 getCompressorFile().getPath(),
                 options[0],
-                getFile().getPath(),
+                getFileToCompress().getPath(),
                 options[1],
                 getCompressedFileNameWithEndExtension()
         };
 
-        long compressionTime = compressorRunner(commands);
+        long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
 
         File compressedFile = new File(getCompressedFileNameWithPath().toUri());
         if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
         
         return new CompressionStatistics(
                 getMethod(),
-                getFile(),
+                getFileToCompress(),
                 compressionTime,
                 compressedFile
         );
@@ -58,13 +62,5 @@ public class CompressorZSTD extends Compressor {
         return null;
     }
 
-    @Override
-    public void run() {
-        logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        try {
-            System.out.println(compress());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }
