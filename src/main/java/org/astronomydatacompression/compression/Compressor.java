@@ -1,6 +1,7 @@
 package org.astronomydatacompression.compression;
 
 import org.astronomydatacompression.statistics.CompressionStatistics;
+import org.astronomydatacompression.statistics.DecompressionStatistics;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -16,6 +17,7 @@ public abstract class Compressor implements Compressable, Runnable {
     private final File compressorFile;
 
     private CompressionStatistics compressionStatistics;
+    private DecompressionStatistics decompressionStatistics;
 
     protected static final Logger logger = Logger.getLogger(Compressor.class.getName());
 
@@ -139,9 +141,12 @@ public abstract class Compressor implements Compressable, Runnable {
 
     @Override
     public void run() {
-        System.out.println("Start compress method in " + getMethod().toString() + " Thread.");
         try {
+            System.out.println("Start compress method " + getMethod().toString());
             compressionStatistics = compress(fileToCompress);
+
+            System.out.println("Start decompress method " + getMethod().toString());
+            decompressionStatistics = deCompress(compressionStatistics.getCompressedFile());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

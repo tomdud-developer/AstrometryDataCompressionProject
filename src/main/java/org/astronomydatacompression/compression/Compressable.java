@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public interface Compressable {
     CompressionStatistics compress(File fileToCompress) throws IOException;
-    File deCompress();
+    DecompressionStatistics deCompress(File fileToDecompress);
 
     CompressMethod getMethod();
 }

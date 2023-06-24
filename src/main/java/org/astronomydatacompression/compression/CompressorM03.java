@@ -3,6 +3,7 @@ package org.astronomydatacompression.compression;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
+import org.astronomydatacompression.statistics.DecompressionStatistics;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class CompressorM03 extends Compressor {
     }
 
     @Override
-    public File deCompress() {
+    public DecompressionStatistics deCompress(File fileToDecompression) {
         return null;
     }
 
