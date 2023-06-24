@@ -21,7 +21,9 @@ public class CompressorBSC extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.executableFileName")
                 ).toFile(),
-                CompressMethod.BSC);
+                CompressMethod.BSC,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.defaultExtension")
+        );
     }
 
     @Override
@@ -30,7 +32,7 @@ public class CompressorBSC extends Compressor {
                 getCompressorFile().getPath(),
                 PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.bsc.compressCommand"),
                 getFile().getPath(),
-                getCompressedFileName()
+                getCompressedFileNameWithEndExtension()
         };
 
         long compressionTime = compressorRunner(commands);

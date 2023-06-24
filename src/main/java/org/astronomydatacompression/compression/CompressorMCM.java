@@ -22,7 +22,8 @@ public class CompressorMCM extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.mcm.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.mcm.executableFileName")
                 ).toFile(),
-                CompressMethod.MCM);
+                CompressMethod.MCM,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.defaultExtension"));
     }
 
     @Override
@@ -35,7 +36,7 @@ public class CompressorMCM extends Compressor {
                 getCompressorFile().getPath(),
                 options[0],
                 getFile().getPath(),
-                getCompressedFileName()
+                getCompressedFileNameWithEndExtension()
         };
 
         long compressionTime = compressorRunner(commands);

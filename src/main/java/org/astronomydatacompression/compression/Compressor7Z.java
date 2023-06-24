@@ -22,17 +22,13 @@ public class Compressor7Z extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.7z.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.7z.executableFileName")
                 ).toFile(),
-                CompressMethod.SEVEN_Z);
+                CompressMethod.SEVEN_Z,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.7z.defaultExtension"));
     }
 
     @Override
     public CompressionStatistics compress() throws IOException {
-        Path copiedFilePath = null;
-        try {
-            copiedFilePath = Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getCompressedFileName()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Path copiedFilePath = copyFileToCompressToSessionWorkingDirectoryAndSetMethodName();
 
         String[] options = PropertiesLoader.INSTANCE.getListOfValuesDefinedInArray(
                 PropertiesType.EXTERNAL, "compressors.7z.options").toArray(new String[0]);

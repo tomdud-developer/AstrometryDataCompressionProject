@@ -1,22 +1,25 @@
 package org.astronomydatacompression.compression;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 public abstract class Compressor implements Compressable, Runnable {
+    private final String defaultFileExtension;
     private final CompressMethod compressMethod;
     private final File file;
     private final Path workingDirectoryPath;
     private final File compressorFile;
     protected static final Logger logger = Logger.getLogger(Compressor.class.getName());
 
-    public Compressor(File file, Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod) {
+    public Compressor(File file, Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod, String defaultFileExtension) {
         this.compressMethod = compressMethod;
         this.workingDirectoryPath = workingDirectoryPath;
         this.compressorFile = compressorFile;
         this.file = file;
+        this.defaultFileExtension = defaultFileExtension;
     }
 
     public File getFile() {
@@ -31,12 +34,19 @@ public abstract class Compressor implements Compressable, Runnable {
     public Path getWorkingDirectoryPath() {
         return workingDirectoryPath;
     }
-    public String getCompressedFileName() {
-        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString() + "." + file.getName().split("\\.")[1];
+    public String getCompressedFileNameWithEndExtension() {
+        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString()
+                + "." + file.getName().split("\\.")[1]
+                + (defaultFileExtension.isEmpty() ? "" : "." + defaultFileExtension);
+    }
+
+    public String getCompressedFileNameWithoutEndExtension() {
+        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString()
+                + "." + file.getName().split("\\.")[1];
     }
 
     public Path getCompressedFileNameWithPath() {
-        return Paths.get(workingDirectoryPath.toString(), getCompressedFileName());
+        return Paths.get(workingDirectoryPath.toString(), getCompressedFileNameWithEndExtension());
     }
 
     public File getCompressorFile() {
@@ -112,6 +122,17 @@ public abstract class Compressor implements Compressable, Runnable {
         }
 
         return fileName + addedStrBeforeDot + extension;
+    }
+
+    public Path copyFileToCompressToSessionWorkingDirectoryAndSetMethodName() {
+        Path copiedFilePath = null;
+        try {
+            copiedFilePath = Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getCompressedFileNameWithoutEndExtension()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return copiedFilePath;
     }
 
 }

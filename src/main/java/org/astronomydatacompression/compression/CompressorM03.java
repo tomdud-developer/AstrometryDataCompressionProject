@@ -22,7 +22,8 @@ public class CompressorM03 extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.executableFileName")
                 ).toFile(),
-                CompressMethod.M03);
+                CompressMethod.M03,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.defaultExtension"));
     }
 
     @Override
@@ -32,7 +33,7 @@ public class CompressorM03 extends Compressor {
                 PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.compressCommand"),
                 PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.m03.blockSize"),
                 getFile().getPath(),
-                getCompressedFileName()
+                getCompressedFileNameWithEndExtension()
         };
 
         long compressionTime = compressorRunner(commands);

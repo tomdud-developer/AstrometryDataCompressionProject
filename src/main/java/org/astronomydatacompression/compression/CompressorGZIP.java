@@ -22,7 +22,8 @@ public class CompressorGZIP extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.executableFileName")
                 ).toFile(),
-                CompressMethod.GZIP);
+                CompressMethod.GZIP,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.defaultExtension"));
     }
 
     @Override

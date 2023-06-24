@@ -23,7 +23,8 @@ public class CompressorPPMD extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.executableFileName")
                 ).toFile(),
-                CompressMethod.PPMD);
+                CompressMethod.PPMD,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.defaultExtension"));
     }
 
     @Override
@@ -38,7 +39,7 @@ public class CompressorPPMD extends Compressor {
         String[] commands = new String[3 + options.length + 1];
         commands[0] = getCompressorFile().getPath();
         commands[1] = PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.ppmd.compressCommand");
-        commands[2] = "-f" + getCompressedFileName();
+        commands[2] = "-f" + getCompressedFileNameWithEndExtension();
 
         System.arraycopy(options, 0, commands, 3, options.length);
 

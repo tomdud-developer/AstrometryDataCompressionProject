@@ -22,7 +22,8 @@ public class CompressorZSTD extends Compressor {
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.zstd.folderName"),
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.zstd.executableFileName")
                 ).toFile(),
-                CompressMethod.ZSTD);
+                CompressMethod.ZSTD,
+                PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.zstd.defaultExtension"));
     }
 
     @Override
@@ -36,7 +37,7 @@ public class CompressorZSTD extends Compressor {
                 options[0],
                 getFile().getPath(),
                 options[1],
-                getCompressedFileName()
+                getCompressedFileNameWithEndExtension()
         };
 
         long compressionTime = compressorRunner(commands);
