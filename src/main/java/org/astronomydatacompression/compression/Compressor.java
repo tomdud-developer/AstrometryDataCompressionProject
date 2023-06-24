@@ -166,7 +166,6 @@ public abstract class Compressor implements Compressable, Runnable {
 
             System.out.println("Start decompress method " + getMethod().toString());
             decompressionStatistics = deCompress(compressionStatistics.getCompressedFile());
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

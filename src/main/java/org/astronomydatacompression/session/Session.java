@@ -2,12 +2,14 @@ package org.astronomydatacompression.session;
 
 import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
+import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -113,6 +115,8 @@ public class Session implements Runnable {
             compressionStatistics.forEach(System.out::println);
             decompressionStatistics.forEach(System.out::println);
 
+            checkFilesIntegrity();
+
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -125,6 +129,18 @@ public class Session implements Runnable {
                     decompressionStatistics.add(compressor.getDecompressionStatistics());
                 }
         );
+    }
+
+    private void checkFilesIntegrity() {
+        System.out.println("### Check integrity of files ###");
+        for (DecompressionStatistics decompressionStats: decompressionStatistics) {
+            try {
+                boolean isTheSame = FilesIntegrityChecker.compareByMemoryMappedFiles(fileToCompress.toPath(), decompressionStats.getDecompressedFile().toPath());
+                System.out.printf("For method %s files are %s%n", decompressionStats.getCompressMethod(), isTheSame ? "THE SAME" : "NOT THE SAME");
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
 
     }
 
