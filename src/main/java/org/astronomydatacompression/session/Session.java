@@ -5,6 +5,7 @@ import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.resultspresentation.JavaFXApplication;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
 
@@ -20,12 +21,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Session implements Runnable {
-
-    private static final Logger logger = Logger.getLogger(Session.class.getName());
 
     private final String SESSION_ID;
     private Path workingDirectoryPath;
@@ -116,6 +114,9 @@ public class Session implements Runnable {
             decompressionStatistics.forEach(System.out::println);
 
             checkFilesIntegrity();
+
+            JavaFXApplication javaFXApplication = new JavaFXApplication();
+            javaFXApplication.runner();
 
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);

@@ -7,7 +7,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
 
 public abstract class Compressor implements Compressable, Runnable {
     private final String defaultFileExtension;
@@ -17,12 +16,8 @@ public abstract class Compressor implements Compressable, Runnable {
     private final File compressorFile;
 
     private CompressionStatistics compressionStatistics;
-
-
-
     private DecompressionStatistics decompressionStatistics;
 
-    protected static final Logger logger = Logger.getLogger(Compressor.class.getName());
 
     public Compressor(Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod, String defaultFileExtension) {
         this.compressMethod = compressMethod;

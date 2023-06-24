@@ -1,10 +1,18 @@
 plugins {
     id 'java'
-    id 'org.openjfx.javafxplugin' version '0.0.14'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 group 'org.astronomydatacompression'
 version '1.0-SNAPSHOT'
+mainClassName="org.astronomydatacompression.Main"
+
+javafx {
+    version = "20"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
 
 repositories {
     mavenCentral()
@@ -17,11 +25,9 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
 }
 
-javafx {
-    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.base', 'javafx.graphics' ]
-}
-
 
 test {
     useJUnitPlatform()
 }
+
+

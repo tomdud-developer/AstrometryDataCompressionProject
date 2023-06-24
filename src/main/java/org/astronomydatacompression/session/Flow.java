@@ -3,12 +3,9 @@ package org.astronomydatacompression.session;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Flow implements Runnable {
-    private static final Logger logger = Logger.getLogger(Flow.class.getName());
 
     private final Session session;
     public Flow() {
