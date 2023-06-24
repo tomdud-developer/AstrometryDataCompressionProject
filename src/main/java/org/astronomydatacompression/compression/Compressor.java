@@ -17,6 +17,9 @@ public abstract class Compressor implements Compressable, Runnable {
     private final File compressorFile;
 
     private CompressionStatistics compressionStatistics;
+
+
+
     private DecompressionStatistics decompressionStatistics;
 
     protected static final Logger logger = Logger.getLogger(Compressor.class.getName());
@@ -57,8 +60,21 @@ public abstract class Compressor implements Compressable, Runnable {
                 + "." + fileToCompress.getName().split("\\.")[1];
     }
 
+    public String getDecompressedFileName() {
+        return fileToCompress.getName().split("\\.")[0] + "_decompressed_" + getMethod().toString()
+                + "." + fileToCompress.getName().split("\\.")[1];
+    }
+
+    public Path getCompressedFileNameWithoutEndExtensionPath() {
+        return Paths.get(workingDirectoryPath.toString(), getCompressedFileNameWithoutEndExtension());
+    }
+
     public Path getCompressedFileNameWithPath() {
         return Paths.get(workingDirectoryPath.toString(), getCompressedFileNameWithEndExtension());
+    }
+
+    public Path getDecompressedFileNameWithPath() {
+        return Paths.get(workingDirectoryPath.toString(), getDecompressedFileName());
     }
 
     public File getCompressorFile() {
@@ -138,6 +154,9 @@ public abstract class Compressor implements Compressable, Runnable {
         return compressionStatistics;
     }
 
+    public DecompressionStatistics getDecompressionStatistics() {
+        return decompressionStatistics;
+    }
 
     @Override
     public void run() {
@@ -147,6 +166,7 @@ public abstract class Compressor implements Compressable, Runnable {
 
             System.out.println("Start decompress method " + getMethod().toString());
             decompressionStatistics = deCompress(compressionStatistics.getCompressedFile());
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -30,25 +30,16 @@ public class CompressorGZIP extends Compressor {
                 PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.gzip.defaultExtension"));
     }
 
-        @Override
+    @Override
     public CompressionStatistics compress(File file) throws IOException {
         
         setFileToCompress(file);
-        Path pathToCopiedFile = null;
-        try {
-            pathToCopiedFile = Files.copy(
-                    getFileToCompress().toPath(),
-                    getWorkingDirectoryPath().resolve(
-                            getCompressedFileNameWithoutEndExtension()
-                    )
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Path pathToCopiedOriginalFileToWorkspace = copyFileToCompressToSessionWorkingDirectoryAndSetMethodName();
+
 
         String[] commands = new String[] {
                 getCompressorFile().getPath(),
-                pathToCopiedFile.toString()
+                pathToCopiedOriginalFileToWorkspace.toString()
         };
 
         long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
@@ -66,7 +57,30 @@ public class CompressorGZIP extends Compressor {
 
     @Override
     public DecompressionStatistics deCompress(File fileToDecompression) {
-        return null;
+        String[] commands = new String[] {
+                getCompressorFile().getPath(),
+                "-dk",
+                fileToDecompression.getPath(),
+        };
+
+        long decompressionTime = compressorRunner(commands, Operation.DECOMPRESSION);
+
+        //It produces compressedFileWithoutCompressionExtension, it must be renamed
+        File oldDeocmpressedFile = getCompressedFileNameWithoutEndExtensionPath().toFile();
+        File newDecompressedFile = getDecompressedFileNameWithPath().toFile();
+        if(!oldDeocmpressedFile.renameTo(newDecompressedFile))
+            throw new RuntimeException("There is a problem with rename decompressed file, method: " + getMethod());
+
+
+        File decompressedFile = new File(getDecompressedFileNameWithPath().toUri());
+        if(!decompressedFile.exists()) throw new RuntimeException("There is no decompressed file, method: " + getMethod());
+
+        return new DecompressionStatistics(
+                getMethod(),
+                fileToDecompression,
+                decompressionTime,
+                decompressedFile
+        );
     }
 
 

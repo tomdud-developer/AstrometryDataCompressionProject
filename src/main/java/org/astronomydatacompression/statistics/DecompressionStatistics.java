@@ -14,7 +14,7 @@ public class DecompressionStatistics {
 
     private final CompressMethod compressMethod;
     private final File compressedFile;
-    private final long decompressionTimeInNs;
+    private final double decompressionTimeInSeconds;
     private final File decompressedFile;
     private final double compressedFileInMB;
     private final double decompressedFileInMB;
@@ -26,15 +26,27 @@ public class DecompressionStatistics {
     ) {
         this.compressMethod = compressMethod;
         this.compressedFile = compressedFile;
-        this.decompressionTimeInNs = decompressionTimeInNs;
+        this.decompressionTimeInSeconds = decompressionTimeInNs / 1_000_000_000.0;
         this.decompressedFile = decompressedFile;
 
         try {
-            compressedFileInMB = Files.size(compressedFile.toPath()) / 1000.0;
-            decompressedFileInMB = Files.size(decompressedFile.toPath()) / 1000.0;
+            compressedFileInMB = Files.size(compressedFile.toPath()) / 1000_000.0;
+            decompressedFileInMB = Files.size(decompressedFile.toPath()) / 1000_000.0;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                """
+                ###  DECOMPRESSION STATISTICS for Method %s  ###
+                File to decompress size: %f MB
+                Decompression Time: %f seconds
+                Decompressed File Size: %f MB
+                """,
+                compressMethod, compressedFileInMB, decompressionTimeInSeconds, decompressedFileInMB);
     }
 
 

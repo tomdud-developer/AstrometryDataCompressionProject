@@ -15,7 +15,7 @@ import java.util.Date;
 public class CompressionStatistics {
     private final CompressMethod compressMethod;
     private final File inputFile;
-    private final long compressionTimeInNs;
+    private final double compressionTimeInSeconds;
     private final File compressedFile;
 
     private final double inputSizeInMB;
@@ -29,30 +29,31 @@ public class CompressionStatistics {
 
         this.compressMethod = compressMethod;
         this.inputFile = inputFile;
-        this.compressionTimeInNs = compressionTimeInNs;
+        this.compressionTimeInSeconds = compressionTimeInNs / 1_000_000_000.0;
         this.compressedFile = compressedFile;
 
         try {
-            inputSizeInMB = Files.size(inputFile.toPath()) / 1000.0;
-            outputSizeInMB = Files.size(compressedFile.toPath()) / 1000.0;
+            inputSizeInMB = Files.size(inputFile.toPath()) / 1000_000.0;
+            outputSizeInMB = Files.size(compressedFile.toPath()) / 1000_000.0;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public double getCompressionSpeedInKBPS() {
-        return inputSizeInMB / compressionTimeInNs * 1_000_000L;
+    public double getCompressionSpeedInMBPS() {
+        return inputSizeInMB / compressionTimeInSeconds;
     }
 
     @Override
     public String toString() {
         return String.format(
                 """
-                Input File Size: %f B
-                Compression Time: %d ns
-                Output File Size: %f B
+                ###  COMPRESSION STATISTICS for Method %s  ###
+                Input File Size: %f MB
+                Compression Time: %f seconds
+                Output File Size: %f MB
                 """,
-                inputSizeInMB, compressionTimeInNs, outputSizeInMB);
+                compressMethod, inputSizeInMB, compressionTimeInSeconds, outputSizeInMB);
     }
 
 

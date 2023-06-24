@@ -60,7 +60,25 @@ public class CompressorZSTD extends Compressor {
 
     @Override
     public DecompressionStatistics deCompress(File fileToDecompression) {
-        return null;
+        String[] commands = new String[] {
+                getCompressorFile().getPath(),
+                "-dk",
+                fileToDecompression.getPath(),
+                "-o",
+                getDecompressedFileName()
+        };
+
+        long decompressionTime = compressorRunner(commands, Operation.DECOMPRESSION);
+
+        File decompressedFile = new File(getDecompressedFileNameWithPath().toUri());
+        if(!decompressedFile.exists()) throw new RuntimeException("There is no decompressed file, method: " + getMethod());
+
+        return new DecompressionStatistics(
+                getMethod(),
+                fileToDecompression,
+                decompressionTime,
+                decompressedFile
+        );
     }
 
 

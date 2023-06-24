@@ -60,7 +60,30 @@ public class Compressor7Z extends Compressor {
 
     @Override
     public DecompressionStatistics deCompress(File fileToDecompression) {
-        return null;
+        String[] commands = new String[] {
+                getCompressorFile().getPath(),
+                "-dk",
+                fileToDecompression.getPath(),
+        };
+
+        long decompressionTime = compressorRunner(commands, Operation.DECOMPRESSION);
+
+        //It produces compressedFileWithoutCompressionExtension, it must be renamed
+        File oldDeocmpressedFile = getCompressedFileNameWithoutEndExtensionPath().toFile();
+        File newDecompressedFile = getDecompressedFileNameWithPath().toFile();
+        if(!oldDeocmpressedFile.renameTo(newDecompressedFile))
+            throw new RuntimeException("There is a problem with rename decompressed file, method: " + getMethod());
+
+
+        File decompressedFile = new File(getDecompressedFileNameWithPath().toUri());
+        if(!decompressedFile.exists()) throw new RuntimeException("There is no decompressed file, method: " + getMethod());
+
+        return new DecompressionStatistics(
+                getMethod(),
+                fileToDecompression,
+                decompressionTime,
+                decompressedFile
+        );
     }
 
 

@@ -36,11 +36,8 @@ public class CompressorPPMD extends Compressor {
         
         setFileToCompress(file);
 
-        try {
-            Files.copy(getFileToCompress().toPath(), getWorkingDirectoryPath().resolve(getFileToCompress().getName()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Path pathToCopiedOriginalFileToWorkspace = copyFileToCompressToSessionWorkingDirectoryAndSetMethodName();
+
         String[] options = PropertiesLoader.INSTANCE.getListOfValuesDefinedInArray(
                 PropertiesType.EXTERNAL, "compressors.ppmd.options").toArray(new String[0]);
         String[] commands = new String[3 + options.length + 1];
@@ -50,7 +47,7 @@ public class CompressorPPMD extends Compressor {
 
         System.arraycopy(options, 0, commands, 3, options.length);
 
-        commands[3 + options.length] = getFileToCompress().getName();
+        commands[3 + options.length] = pathToCopiedOriginalFileToWorkspace.toString();
 
 
         long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
@@ -68,7 +65,30 @@ public class CompressorPPMD extends Compressor {
 
     @Override
     public DecompressionStatistics deCompress(File fileToDecompression) {
-        return null;
+        String[] commands = new String[] {
+                getCompressorFile().getPath(),
+                "d",
+                fileToDecompression.getPath(),
+        };
+
+        long decompressionTime = compressorRunner(commands, Operation.DECOMPRESSION);
+
+        //It produces compressedFileWithoutCompressionExtension, it must be renamed
+        File oldDeocmpressedFile = getCompressedFileNameWithoutEndExtensionPath().toFile();
+        File newDecompressedFile = getDecompressedFileNameWithPath().toFile();
+        if(!oldDeocmpressedFile.renameTo(newDecompressedFile))
+            throw new RuntimeException("There is a problem with rename decompressed file, method: " + getMethod());
+
+
+        File decompressedFile = new File(getDecompressedFileNameWithPath().toUri());
+        if(!decompressedFile.exists()) throw new RuntimeException("There is no decompressed file, method: " + getMethod());
+
+        return new DecompressionStatistics(
+                getMethod(),
+                fileToDecompression,
+                decompressionTime,
+                decompressedFile
+        );
     }
 
 

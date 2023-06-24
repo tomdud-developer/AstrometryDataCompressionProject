@@ -5,6 +5,7 @@ import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
+import org.astronomydatacompression.statistics.DecompressionStatistics;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +30,7 @@ public class Session implements Runnable {
     private File fileToCompress;
     List<CompressMethod> methodsList;
     private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
+    private final List<DecompressionStatistics> decompressionStatistics = new ArrayList<>();
     private final List<Compressor> compressors = new ArrayList<>();
 
 
@@ -109,6 +111,7 @@ public class Session implements Runnable {
             System.out.println("All threads have ended. Collect statistics.");
             collectStatisticsFromCompressors();
             compressionStatistics.forEach(System.out::println);
+            decompressionStatistics.forEach(System.out::println);
 
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -117,8 +120,12 @@ public class Session implements Runnable {
 
     private void collectStatisticsFromCompressors() {
         compressors.forEach(
-                compressor -> compressionStatistics.add(compressor.getCompressionStatistics())
+                compressor -> {
+                    compressionStatistics.add(compressor.getCompressionStatistics());
+                    decompressionStatistics.add(compressor.getDecompressionStatistics());
+                }
         );
+
     }
 
     private void createWorkingDirectory() {
