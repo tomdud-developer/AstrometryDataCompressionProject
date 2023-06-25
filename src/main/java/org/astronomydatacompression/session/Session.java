@@ -1,5 +1,6 @@
 package org.astronomydatacompression.session;
 
+import javafx.application.Application;
 import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
@@ -8,9 +9,11 @@ import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.resultspresentation.JavaFXApplication;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
+import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -32,7 +35,6 @@ public class Session implements Runnable {
     private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
     private final List<DecompressionStatistics> decompressionStatistics = new ArrayList<>();
     private final List<Compressor> compressors = new ArrayList<>();
-
 
     public Session() {
         SESSION_ID = generateSessionId();
@@ -110,18 +112,30 @@ public class Session implements Runnable {
 
             System.out.println("All threads have ended. Collect statistics.");
             collectStatisticsFromCompressors();
-            compressionStatistics.forEach(System.out::println);
-            decompressionStatistics.forEach(System.out::println);
-
             checkFilesIntegrity();
 
-            JavaFXApplication javaFXApplication = new JavaFXApplication();
-            javaFXApplication.runner();
+            generateSessionStatisticsAndRunJavaFXPresentation();
 
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private void generateSessionStatisticsAndRunJavaFXPresentation() {
+/*        JavaFXApplication javaFXApplication = new JavaFXApplication(new SessionStatistics(
+                SESSION_ID,
+                fileToCompress,
+                compressionStatistics,
+                decompressionStatistics));
+*/
+        Application.launch(JavaFXApplication.class);
+
+        //JavaFXApplication javaFXApplication = JavaFXApplication.waitForJavaFxApplication();
+       // javaFXApplication.printSomething();
+        //javaFXApplication.createCompressionTimeBarChart();
+
+    }
+
 
     private void collectStatisticsFromCompressors() {
         compressors.forEach(
@@ -130,6 +144,8 @@ public class Session implements Runnable {
                     decompressionStatistics.add(compressor.getDecompressionStatistics());
                 }
         );
+        compressionStatistics.forEach(System.out::println);
+        decompressionStatistics.forEach(System.out::println);
     }
 
     private void checkFilesIntegrity() {
