@@ -41,6 +41,10 @@ public class CompressionStatistics {
         return inputSizeInMB / compressionTimeInSeconds;
     }
 
+    public double getCompressionRatio() {
+        return inputSizeInMB / outputSizeInMB;
+    }
+
     @Override
     public String toString() {
         return String.format(

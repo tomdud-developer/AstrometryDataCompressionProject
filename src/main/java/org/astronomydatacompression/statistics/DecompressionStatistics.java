@@ -37,6 +37,10 @@ public class DecompressionStatistics {
         }
     }
 
+    public double getDecompressionSpeedInMBPS() {
+        return compressedFileInMB / decompressionTimeInSeconds;
+    }
+
     @Override
     public String toString() {
         return String.format(
