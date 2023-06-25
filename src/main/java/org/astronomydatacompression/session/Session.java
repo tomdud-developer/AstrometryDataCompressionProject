@@ -103,11 +103,12 @@ public class Session implements Runnable {
                 Thread compressThread = new Thread(compressor);
                 compressThread.start();
                 threads.add(compressThread);
+                compressThread.join();
             }
 
-            for (Thread thread : threads) {
-                thread.join();
-            }
+            //for (Thread thread : threads) {
+              //  thread.join();
+           // }
 
             System.out.println("All threads have ended. Collect statistics.");
             collectStatisticsFromCompressors();
