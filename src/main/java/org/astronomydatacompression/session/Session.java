@@ -13,7 +13,6 @@ import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -122,22 +121,15 @@ public class Session implements Runnable {
     }
 
     private void generateSessionStatisticsAndRunJavaFXPresentation() {
-/*        JavaFXApplication javaFXApplication = new JavaFXApplication(new SessionStatistics(
+
+        new Thread(() -> Application.launch(JavaFXApplication.class)).start();
+        JavaFXApplication javaFXApplication = JavaFXApplication.waitForInstance();
+        javaFXApplication.sendStatistcsToShow(new SessionStatistics(
                 SESSION_ID,
                 fileToCompress,
                 compressionStatistics,
-                decompressionStatistics));
-*/
-       // Application.launch(JavaFXApplication.class);
-
-        new Thread() {
-            @Override
-            public void run() {
-                javafx.application.Application.launch(JavaFXApplication.class);
-            }
-        }.start();
-        JavaFXApplication javaFXApplication = JavaFXApplication.waitForInstance();
-        javaFXApplication.test();
+                decompressionStatistics)
+        );
 
     }
 
