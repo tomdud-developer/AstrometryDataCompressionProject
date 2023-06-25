@@ -1,12 +1,10 @@
 package org.astronomydatacompression.session;
 
-import javafx.application.Application;
 import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
-import org.astronomydatacompression.resultspresentation.JavaFXApplication;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
 import org.astronomydatacompression.statistics.SessionStatistics;
@@ -51,11 +49,7 @@ public class Session implements Runnable {
     public String getSESSION_ID() {
         return SESSION_ID;
     }
-
-    public Path getWorkingDirectoryPath() {
-        return workingDirectoryPath;
-    }
-
+    
     public void setWorkingDirectoryPath(String workingDirectoryPath) {
         try {
             this.workingDirectoryPath = Paths.get(workingDirectoryPath);
@@ -85,11 +79,16 @@ public class Session implements Runnable {
     public List<CompressMethod> getMethodsList() {
         return methodsList;
     }
-
+    
+    public boolean isShouldBeParallelComputing() {
+        return Boolean.getBoolean(PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "session.isShouldBeParallelComputing"));
+    }
+    
     @Override
     public void run() {
         System.out.println(String.format("Session %s was started.", SESSION_ID));
         createWorkingDirectory();
+
         System.out.println("Create Compression Threads.");
         List<Thread> threads = new ArrayList<>();
 
@@ -100,12 +99,10 @@ public class Session implements Runnable {
                 Thread compressThread = new Thread(compressor);
                 compressThread.start();
                 threads.add(compressThread);
-                //compressThread.join();
+                if(!isShouldBeParallelComputing())compressThread.join();
             }
 
-            for (Thread thread : threads) {
-                thread.join();
-            }
+            if(isShouldBeParallelComputing()) for (Thread thread : threads) thread.join();
 
             System.out.println("All threads have ended. Collect statistics.");
             collectStatisticsFromCompressors();
