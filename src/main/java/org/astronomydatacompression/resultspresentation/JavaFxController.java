@@ -12,6 +12,7 @@ import org.astronomydatacompression.statistics.DecompressionStatistics;
 import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class JavaFxController {
     @FXML
@@ -46,13 +47,7 @@ public class JavaFxController {
     public void setUpGUIElements() {
         setUpInputFileInformationListView();
         setUpCompressorsInformationListView();
-
-        setUpCompressionTimeChart();
-/*        setUpCompressionSpeedChart();
-        setUpCompressedFileSizesBarChart();
-        setUpCompressionRatioBarChart();
-        setUpDecompressionTimeChart();
-        setUpDecompressionSpeedChart();*/
+        setUpStatisticsCharts();
     }
 
     private void setUpInputFileInformationListView() {
@@ -76,69 +71,38 @@ public class JavaFxController {
         compressorsInformationListView.setItems(compressorsNames);
     }
 
-    public void setUpCompressionTimeChart() {
+    public void setUpStatisticsCharts() {
+        updateCompressionChart(compressionTimeBarChart, CompressionStatistics::getCompressionTimeInSeconds);
+        updateCompressionChart(compressionSpeedBarChart, CompressionStatistics::getCompressionSpeedInMBPS);
+        updateCompressionChart(compressionRatioBarChart, CompressionStatistics::getCompressionRatio);
+        updateCompressionChart(compressedFileSizesBarChart, CompressionStatistics::getOutputSizeInMB);
+        updateDecompressionChart(decompressionTimeBarChart, DecompressionStatistics::getDecompressionTimeInSeconds);
+        updateDecompressionChart(decompressionSpeedBarChart, DecompressionStatistics::getDecompressionSpeedInMBPS);
+    }
+
+    public void updateCompressionChart(BarChart<String, Number> barChart, Function<CompressionStatistics, Double> function) {
         for (SessionStatistics sessionStatistics : sessionStatisticsList) {
             XYChart.Series series = new XYChart.Series();
             series.setName(sessionStatistics.getOriginalFile().getName());
             for (CompressionStatistics compressionStatistics : sessionStatistics.getCompressionStatistics()) {
-                series.getData().add(new XYChart.Data(compressionStatistics.getCompressMethod().toString(), compressionStatistics.getCompressionTimeInSeconds()));
+                series.getData().add(new XYChart.Data(compressionStatistics.getCompressMethod().toString(), function.apply(compressionStatistics)));
             }
 
-            compressionTimeBarChart.getXAxis().setAnimated(false);
-            compressionTimeBarChart.getData().add(series);
+            barChart.getXAxis().setAnimated(false);
+            barChart.getData().add(series);
         }
     }
-/*
-    public void setUpCompressionSpeedChart() {
-        XYChart.Series series = new XYChart.Series();
-        series.setName("Compression speed");
 
-        for (CompressionStatistics compressionStatistics : sessionStatistics.getCompressionStatistics()) {
-            series.getData().add(new XYChart.Data(compressionStatistics.getCompressMethod().toString(), compressionStatistics.getCompressionSpeedInMBPS()));
+    public void updateDecompressionChart(BarChart<String, Number> barChart, Function<DecompressionStatistics, Double> function) {
+        for (SessionStatistics sessionStatistics : sessionStatisticsList) {
+            XYChart.Series series = new XYChart.Series();
+            series.setName(sessionStatistics.getOriginalFile().getName());
+            for (DecompressionStatistics decompressionStatistics : sessionStatistics.getDecompressionStatistics()) {
+                series.getData().add(new XYChart.Data(decompressionStatistics.getCompressMethod().toString(), function.apply(decompressionStatistics)));
+            }
+
+            barChart.getXAxis().setAnimated(false);
+            barChart.getData().add(series);
         }
-        compressionSpeedBarChart.getXAxis().setAnimated(false);
-        compressionSpeedBarChart.getData().addAll(series);
     }
-
-    public void setUpCompressionRatioBarChart() {
-        XYChart.Series series = new XYChart.Series();
-        series.setName("Compression ratio");
-        for (CompressionStatistics compressionStatistics : compressionStatisticsList) {
-            series.getData().add(new XYChart.Data(compressionStatistics.getCompressMethod().toString(), compressionStatistics.getCompressionRatio()));
-        }
-        compressionRatioBarChart.getXAxis().setAnimated(false);
-        compressionRatioBarChart.getData().addAll(series);
-    }
-
-    public void setUpCompressedFileSizesBarChart() {
-        XYChart.Series series = new XYChart.Series();
-        series.setName("Compressed files sizes");
-        for (CompressionStatistics compressionStatistics : compressionStatisticsList) {
-            series.getData().add(new XYChart.Data(compressionStatistics.getCompressMethod().toString(), compressionStatistics.getOutputSizeInMB()));
-        }
-        compressedFileSizesBarChart.getXAxis().setAnimated(false);
-        compressedFileSizesBarChart.getData().addAll(series);
-    }
-
-    public void setUpDecompressionTimeChart() {
-        XYChart.Series series = new XYChart.Series();
-        series.setName("Decompression time");
-        for (DecompressionStatistics decompressionStatistics : decompressionStatisticsList) {
-            series.getData().add(new XYChart.Data(decompressionStatistics.getCompressMethod().toString(), decompressionStatistics.getDecompressionTimeInSeconds()));
-        }
-
-        decompressionTimeBarChart.getXAxis().setAnimated(false);
-        decompressionTimeBarChart.getData().addAll(series);
-    }
-
-    public void setUpDecompressionSpeedChart() {
-        XYChart.Series series = new XYChart.Series();
-        series.setName("Decompression speed");
-        for (DecompressionStatistics decompressionStatistics : decompressionStatisticsList) {
-            series.getData().add(new XYChart.Data(decompressionStatistics.getCompressMethod().toString(), decompressionStatistics.getDecompressionSpeedInMBPS()));
-        }
-
-        decompressionSpeedBarChart.getXAxis().setAnimated(false);
-        decompressionSpeedBarChart.getData().addAll(series);
-    }*/
 }
