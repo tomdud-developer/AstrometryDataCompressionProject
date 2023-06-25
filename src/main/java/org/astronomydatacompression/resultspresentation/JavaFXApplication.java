@@ -7,11 +7,11 @@ import javafx.stage.Stage;
 import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class JavaFXApplication extends Application {
 
-    private SessionStatistics sessionStatistics;
     private JavaFxController controller;
     public static JavaFXApplication INSTANCE = null;
     public static final CountDownLatch latch = new CountDownLatch(3);
@@ -47,9 +47,8 @@ public class JavaFXApplication extends Application {
         stage.show();
     }
 
-    public void sendStatistcsToShow(SessionStatistics sessionStatistics) {
-        System.out.println("invoked!!!");
-        controller.updateStats(sessionStatistics);
+    public void sendStatistcsToShow(List<SessionStatistics> sessionStatisticsList) {
+        controller.updateStats(sessionStatisticsList);
     }
 
     public static void main(String[] args) {

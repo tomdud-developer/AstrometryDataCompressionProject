@@ -34,6 +34,7 @@ public class Session implements Runnable {
     private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
     private final List<DecompressionStatistics> decompressionStatistics = new ArrayList<>();
     private final List<Compressor> compressors = new ArrayList<>();
+    private SessionStatistics sessionStatistics;
 
     public Session() {
         SESSION_ID = generateSessionId();
@@ -61,10 +62,6 @@ public class Session implements Runnable {
         } catch (InvalidPathException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
-    }
-
-    public File getFileToCompress() {
-        return fileToCompress;
     }
 
     public void setFileToCompress(String fileNameToCompress) {
@@ -103,35 +100,32 @@ public class Session implements Runnable {
                 Thread compressThread = new Thread(compressor);
                 compressThread.start();
                 threads.add(compressThread);
-                compressThread.join();
+                //compressThread.join();
             }
 
-            //for (Thread thread : threads) {
-              //  thread.join();
-           // }
+            for (Thread thread : threads) {
+                thread.join();
+            }
 
             System.out.println("All threads have ended. Collect statistics.");
             collectStatisticsFromCompressors();
             checkFilesIntegrity();
 
-            generateSessionStatisticsAndRunJavaFXPresentation();
+            generateSessionStatistics();
 
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void generateSessionStatisticsAndRunJavaFXPresentation() {
-
-        new Thread(() -> Application.launch(JavaFXApplication.class)).start();
-        JavaFXApplication javaFXApplication = JavaFXApplication.waitForInstance();
-        javaFXApplication.sendStatistcsToShow(new SessionStatistics(
+    private void generateSessionStatistics() {
+         sessionStatistics = new SessionStatistics(
                 SESSION_ID,
                 fileToCompress,
                 compressionStatistics,
-                decompressionStatistics)
-        );
-
+                decompressionStatistics,
+                 compressors.stream().map(Compressor::getMethod).toList()
+         );
     }
 
 
@@ -190,4 +184,7 @@ public class Session implements Runnable {
         );
     }
 
+    public SessionStatistics getSessionStatistics() {
+        return sessionStatistics;
+    }
 }

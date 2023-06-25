@@ -22,7 +22,7 @@
                <children>
                   <VBox prefHeight="800.0" prefWidth="300.0">
                      <children>
-                        <Label alignment="CENTER" minWidth="60.0" prefHeight="40.0" prefWidth="302.0" style="&#10;" text="Astronomy Data Compression Project" textAlignment="CENTER" wrapText="false">
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="40.0" prefWidth="302.0" style="&#10;" text="Astrometry Data Compression Project" textAlignment="CENTER" wrapText="false">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
