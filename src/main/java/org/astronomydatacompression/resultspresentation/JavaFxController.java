@@ -6,11 +6,8 @@ import org.astronomydatacompression.statistics.CompressionStatistics;
 
 public class JavaFxController {
     @FXML
-    private Label algorithmLabel;
-    @FXML
-    private Label compressedSizeLabel;
-    @FXML
-    private Label originalSizeLabel;
+    private Label label1;
+
 
     private CompressionStatistics compressionStatistics;
 
@@ -18,6 +15,6 @@ public class JavaFxController {
     }
 
     public void updateStats(CompressionStatistics compressionStatistics) {
-
+        label1.setText("Invoked");
     }
 }

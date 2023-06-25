@@ -9,7 +9,7 @@ version '1.0-SNAPSHOT'
 mainClassName="org.astronomydatacompression.Main"
 
 javafx {
-    version = "18"
+    version = "20"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 

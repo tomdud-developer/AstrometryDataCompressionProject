@@ -25,35 +25,42 @@ public class JavaFXApplication extends Application {
 
     private SessionStatistics sessionStatistics;
     private JavaFxController controller;
+    public static JavaFXApplication INSTANCE = null;
+    public static final CountDownLatch latch = new CountDownLatch(1);
+    public static JavaFXApplication waitForInstance() {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return INSTANCE;
+    }
+
+    public static void setINSTANCE(JavaFXApplication javaFXApplication) {
+        INSTANCE = javaFXApplication;
+        latch.countDown();
+    }
+
+    public JavaFXApplication() {
+        setINSTANCE(this);
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
-/*        final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        final BarChart<String,Number> bc = new BarChart<>(xAxis,yAxis);
-        bc.setTitle("Compression time");
-        xAxis.setLabel("Compressor");
-        yAxis.setLabel("Time, s");
+        INSTANCE = this;
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("presentation.fxml"));
+        Scene scene = new Scene(fxmlLoader.load());
+        controller = fxmlLoader.getController();
 
-        XYChart.Series series1 = new XYChart.Series();
-        series1.setName("Compression time");
-        // for (CompressionStatistics compressionStatistics : sessionStatistics.getCompressionStatistics()) {
-        //   series1.getData().add(new XYChart.Data(compressionStatistics.getCompressMethod(), compressionStatistics.getCompressionTimeInSeconds()));
-        // }
-
-        Scene scene  = new Scene(bc,800,600);
-        bc.getData().addAll(series1);
-        stage.setScene(scene);
+        controller.updateStats(null);
+        //scene.getStylesheets().add("style.css");
         stage.setTitle("Compressors comparison");
-        stage.show();*/
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("presentation.fxml"));
-        Parent root = loader.load();
-        controller = loader.getController();
-        controller.updateStats(new CompressionStatistics(CompressMethod.M03, new File("notes.txt"), 12L,  new File("notes.txt")));
-
-        Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+    }
+
+    public void test() {
+        System.out.println("Invoked!!!!!!!!!");
     }
 
     public static void main(String[] args) {

@@ -128,11 +128,16 @@ public class Session implements Runnable {
                 compressionStatistics,
                 decompressionStatistics));
 */
-        Application.launch(JavaFXApplication.class);
+       // Application.launch(JavaFXApplication.class);
 
-        //JavaFXApplication javaFXApplication = JavaFXApplication.waitForJavaFxApplication();
-       // javaFXApplication.printSomething();
-        //javaFXApplication.createCompressionTimeBarChart();
+        new Thread() {
+            @Override
+            public void run() {
+                javafx.application.Application.launch(JavaFXApplication.class);
+            }
+        }.start();
+        JavaFXApplication javaFXApplication = JavaFXApplication.waitForInstance();
+        javaFXApplication.test();
 
     }
 
