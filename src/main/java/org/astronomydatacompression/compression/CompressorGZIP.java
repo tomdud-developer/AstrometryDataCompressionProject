@@ -3,19 +3,23 @@ package org.astronomydatacompression.compression;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
+import org.astronomydatacompression.statistics.DecompressionStatistics;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 
 
 public class CompressorGZIP extends Compressor {
 
-    public CompressorGZIP(File file, Path workingDirectoryPath) {
+    public CompressorGZIP(File defaultFileToCompress, Path workingDirectoryPath) {
+        this(workingDirectoryPath);
+        setFileToCompress(defaultFileToCompress);
+    }
+
+    public CompressorGZIP(Path workingDirectoryPath) {
         super(
-                file,
                 workingDirectoryPath,
                 Paths.get(
                         PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "compressors.directory"),
@@ -27,50 +31,58 @@ public class CompressorGZIP extends Compressor {
     }
 
     @Override
-    public CompressionStatistics compress() throws IOException {
-        Path pathToCopiedFile = null;
-        try {
-            pathToCopiedFile = Files.copy(
-                    getFile().toPath(),
-                    getWorkingDirectoryPath().resolve(
-                            getCompressedFileNameWithoutEndExtension()
-                    )
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public CompressionStatistics compress(File file) throws IOException {
+        
+        setFileToCompress(file);
+        Path pathToCopiedOriginalFileToWorkspace = copyFileToCompressToSessionWorkingDirectoryAndSetMethodName();
+
 
         String[] commands = new String[] {
                 getCompressorFile().getPath(),
-                pathToCopiedFile.toString()
+                pathToCopiedOriginalFileToWorkspace.toString()
         };
 
-        long compressionTime = compressorRunner(commands);
+        long compressionTime = compressorRunner(commands, Operation.COMPRESSION);
 
         File compressedFile = new File(getCompressedFileNameWithPath().toUri());
         if(!compressedFile.exists()) throw new RuntimeException("There is no compressed file, method: " + getMethod());
         
         return new CompressionStatistics(
                 getMethod(),
-                getFile(),
+                getFileToCompress(),
                 compressionTime,
                 compressedFile
         );
     }
 
     @Override
-    public File deCompress() {
-        return null;
+    public DecompressionStatistics deCompress(File fileToDecompression) {
+        String[] commands = new String[] {
+                getCompressorFile().getPath(),
+                "-dk",
+                fileToDecompression.getPath(),
+        };
+
+        long decompressionTime = compressorRunner(commands, Operation.DECOMPRESSION);
+
+        //It produces compressedFileWithoutCompressionExtension, it must be renamed
+        File oldDeocmpressedFile = getCompressedFileNameWithoutEndExtensionPath().toFile();
+        File newDecompressedFile = getDecompressedFileNameWithPath().toFile();
+        if(!oldDeocmpressedFile.renameTo(newDecompressedFile))
+            throw new RuntimeException("There is a problem with rename decompressed file, method: " + getMethod());
+
+
+        File decompressedFile = new File(getDecompressedFileNameWithPath().toUri());
+        if(!decompressedFile.exists()) throw new RuntimeException("There is no decompressed file, method: " + getMethod());
+
+        return new DecompressionStatistics(
+                getMethod(),
+                fileToDecompression,
+                decompressionTime,
+                decompressedFile
+        );
     }
 
-    @Override
-    public void run() {
-        logger.log(Level.INFO, "Start compress method" + getMethod().toString() + "Thread.");
-        try {
-            System.out.println(compress());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }
 

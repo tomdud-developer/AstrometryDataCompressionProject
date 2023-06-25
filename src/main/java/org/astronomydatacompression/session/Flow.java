@@ -3,12 +3,9 @@ package org.astronomydatacompression.session;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Flow implements Runnable {
-    private static final Logger logger = Logger.getLogger(Flow.class.getName());
 
     private final Session session;
     public Flow() {
@@ -19,13 +16,13 @@ public class Flow implements Runnable {
     public void run() {
         writeStartInformation();
 
-        logger.log(Level.INFO, "Start session configuration");
+        System.out.println("Start session configuration");
         session.setWorkingDirectoryPath(PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "session.WorkingDirectoryPath"));
         session.setFileToCompress(PropertiesLoader.INSTANCE.getValueByKey(PropertiesType.EXTERNAL, "session.fileNameToCompress"));;
 
         System.out.println(session);
 
-        logger.log(Level.INFO, "Run session Thread");
+        System.out.println("Run session Thread");
         Thread sessionThread = new Thread(session);
         sessionThread.start();
     }

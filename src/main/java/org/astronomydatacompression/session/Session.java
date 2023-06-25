@@ -1,11 +1,18 @@
 package org.astronomydatacompression.session;
 
+import javafx.application.Application;
 import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
+import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
+import org.astronomydatacompression.resultspresentation.JavaFXApplication;
+import org.astronomydatacompression.statistics.CompressionStatistics;
+import org.astronomydatacompression.statistics.DecompressionStatistics;
+import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -16,17 +23,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Session implements Runnable {
-
-    private static final Logger logger = Logger.getLogger(Session.class.getName());
 
     private final String SESSION_ID;
     private Path workingDirectoryPath;
     private File fileToCompress;
     List<CompressMethod> methodsList;
+    private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
+    private final List<DecompressionStatistics> decompressionStatistics = new ArrayList<>();
+    private final List<Compressor> compressors = new ArrayList<>();
 
     public Session() {
         SESSION_ID = generateSessionId();
@@ -84,18 +91,72 @@ public class Session implements Runnable {
 
     @Override
     public void run() {
-        logger.log(Level.INFO, "Session was started.");
+        System.out.println(String.format("Session %s was started.", SESSION_ID));
         createWorkingDirectory();
-        logger.log(Level.INFO, "Create Compression Threads.");
+        System.out.println("Create Compression Threads.");
+        List<Thread> threads = new ArrayList<>();
+
         try {
             for (CompressMethod compressMethod : methodsList) {
                 Compressor compressor = compressMethod.getCompressClass().getDeclaredConstructor(File.class, Path.class).newInstance(fileToCompress, workingDirectoryPath);
+                compressors.add(compressor);
                 Thread compressThread = new Thread(compressor);
                 compressThread.start();
+                threads.add(compressThread);
+                compressThread.join();
             }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+
+            //for (Thread thread : threads) {
+              //  thread.join();
+           // }
+
+            System.out.println("All threads have ended. Collect statistics.");
+            collectStatisticsFromCompressors();
+            checkFilesIntegrity();
+
+            generateSessionStatisticsAndRunJavaFXPresentation();
+
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void generateSessionStatisticsAndRunJavaFXPresentation() {
+
+        new Thread(() -> Application.launch(JavaFXApplication.class)).start();
+        JavaFXApplication javaFXApplication = JavaFXApplication.waitForInstance();
+        javaFXApplication.sendStatistcsToShow(new SessionStatistics(
+                SESSION_ID,
+                fileToCompress,
+                compressionStatistics,
+                decompressionStatistics)
+        );
+
+    }
+
+
+    private void collectStatisticsFromCompressors() {
+        compressors.forEach(
+                compressor -> {
+                    compressionStatistics.add(compressor.getCompressionStatistics());
+                    decompressionStatistics.add(compressor.getDecompressionStatistics());
+                }
+        );
+        compressionStatistics.forEach(System.out::println);
+        decompressionStatistics.forEach(System.out::println);
+    }
+
+    private void checkFilesIntegrity() {
+        System.out.println("### Check integrity of files ###");
+        for (DecompressionStatistics decompressionStats: decompressionStatistics) {
+            try {
+                boolean isTheSame = FilesIntegrityChecker.compareByMemoryMappedFiles(fileToCompress.toPath(), decompressionStats.getDecompressedFile().toPath());
+                System.out.printf("For method %s files are %s%n", decompressionStats.getCompressMethod(), isTheSame ? "THE SAME" : "NOT THE SAME");
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
     }
 
     private void createWorkingDirectory() {
@@ -103,10 +164,13 @@ public class Session implements Runnable {
         try {
             Path folderPath = Paths.get(workingDirectoryPath.toString(), folderName);
             Files.createDirectory(folderPath);
-            logger.log(Level.INFO, "Created new folder with name " + folderPath);
+            System.out.println("Created new folder with name " + folderPath);
             workingDirectoryPath = folderPath;
 
-            folderPath = Paths.get(workingDirectoryPath.toString(), "logs");
+            folderPath = Paths.get(workingDirectoryPath.toString(), "logs_" + Compressor.Operation.COMPRESSION);
+            Files.createDirectory(folderPath);
+
+            folderPath = Paths.get(workingDirectoryPath.toString(), "logs_" + Compressor.Operation.DECOMPRESSION);
             Files.createDirectory(folderPath);
         } catch (Exception e) {
             System.out.println("Folder creation error. " + e.getMessage());

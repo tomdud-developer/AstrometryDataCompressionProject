@@ -1,29 +1,39 @@
 package org.astronomydatacompression.compression;
 
+import org.astronomydatacompression.statistics.CompressionStatistics;
+import org.astronomydatacompression.statistics.DecompressionStatistics;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
 
 public abstract class Compressor implements Compressable, Runnable {
     private final String defaultFileExtension;
     private final CompressMethod compressMethod;
-    private final File file;
+    protected File fileToCompress;
     private final Path workingDirectoryPath;
     private final File compressorFile;
-    protected static final Logger logger = Logger.getLogger(Compressor.class.getName());
 
-    public Compressor(File file, Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod, String defaultFileExtension) {
+    private CompressionStatistics compressionStatistics;
+    private DecompressionStatistics decompressionStatistics;
+
+
+    public Compressor(Path workingDirectoryPath, File compressorFile, CompressMethod compressMethod, String defaultFileExtension) {
         this.compressMethod = compressMethod;
         this.workingDirectoryPath = workingDirectoryPath;
         this.compressorFile = compressorFile;
-        this.file = file;
         this.defaultFileExtension = defaultFileExtension;
     }
 
-    public File getFile() {
-        return file;
+    public void setFileToCompress(File fileToCompress) {
+        this.fileToCompress = fileToCompress;
+    }
+
+    public enum Operation {COMPRESSION, DECOMPRESSION}
+
+    public File getFileToCompress() {
+        return fileToCompress;
     }
 
     @Override
@@ -35,30 +45,43 @@ public abstract class Compressor implements Compressable, Runnable {
         return workingDirectoryPath;
     }
     public String getCompressedFileNameWithEndExtension() {
-        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString()
-                + "." + file.getName().split("\\.")[1]
+        return fileToCompress.getName().split("\\.")[0] + "_compressed_" + getMethod().toString()
+                + "." + fileToCompress.getName().split("\\.")[1]
                 + (defaultFileExtension.isEmpty() ? "" : "." + defaultFileExtension);
     }
 
     public String getCompressedFileNameWithoutEndExtension() {
-        return file.getName().split("\\.")[0] + "_compressed_" + getMethod().toString()
-                + "." + file.getName().split("\\.")[1];
+        return fileToCompress.getName().split("\\.")[0] + "_compressed_" + getMethod().toString()
+                + "." + fileToCompress.getName().split("\\.")[1];
+    }
+
+    public String getDecompressedFileName() {
+        return fileToCompress.getName().split("\\.")[0] + "_decompressed_" + getMethod().toString()
+                + "." + fileToCompress.getName().split("\\.")[1];
+    }
+
+    public Path getCompressedFileNameWithoutEndExtensionPath() {
+        return Paths.get(workingDirectoryPath.toString(), getCompressedFileNameWithoutEndExtension());
     }
 
     public Path getCompressedFileNameWithPath() {
         return Paths.get(workingDirectoryPath.toString(), getCompressedFileNameWithEndExtension());
     }
 
+    public Path getDecompressedFileNameWithPath() {
+        return Paths.get(workingDirectoryPath.toString(), getDecompressedFileName());
+    }
+
     public File getCompressorFile() {
         return compressorFile;
     }
 
-    protected long compressorRunner(String[] commands) {
+    protected long compressorRunner(String[] commands, Operation operation) {
         BufferedReader reader = null;
         BufferedWriter writer = null;
 
         try {
-            File logFile = Paths.get(getWorkingDirectoryPath().toString(), "logs", getMethod().toString() + "_logs").toFile();
+            File logFile = Paths.get(getWorkingDirectoryPath().toString(), "logs_" + operation, getMethod().toString() + "_" + operation + "_logs").toFile();
             if(!logFile.createNewFile()) throw new RuntimeException("Error when create new log file");
 
             ProcessBuilder processBuilder = new ProcessBuilder(commands);
@@ -114,12 +137,33 @@ public abstract class Compressor implements Compressable, Runnable {
     public Path copyFileToCompressToSessionWorkingDirectoryAndSetMethodName() {
         Path copiedFilePath = null;
         try {
-            copiedFilePath = Files.copy(getFile().toPath(), getWorkingDirectoryPath().resolve(getCompressedFileNameWithoutEndExtension()));
+            copiedFilePath = Files.copy(getFileToCompress().toPath(), getWorkingDirectoryPath().resolve(getCompressedFileNameWithoutEndExtension()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         return copiedFilePath;
+    }
+
+    public CompressionStatistics getCompressionStatistics() {
+        return compressionStatistics;
+    }
+
+    public DecompressionStatistics getDecompressionStatistics() {
+        return decompressionStatistics;
+    }
+
+    @Override
+    public void run() {
+        try {
+            System.out.println("Start compress method " + getMethod().toString());
+            compressionStatistics = compress(fileToCompress);
+
+            System.out.println("Start decompress method " + getMethod().toString());
+            decompressionStatistics = deCompress(compressionStatistics.getCompressedFile());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

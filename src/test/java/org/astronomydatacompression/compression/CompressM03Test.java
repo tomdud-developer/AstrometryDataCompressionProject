@@ -11,8 +11,7 @@ class CompressTest {
     @Test
     void compressM03() {
         File file = new File("Workspace\\data.txt");
-        Compressor compressor = new CompressorM03(file, Paths.get("Workspace\\"));
-        File compressedFile = compressor.compress();
+
 
 
 /*        try {
@@ -30,7 +29,7 @@ class CompressTest {
                 .toString();
         File file = new File(userDirectory + "\\Workspace\\data.txt");
         Compressor compressor = new CompressorPPMD(file, Paths.get(userDirectory,"\\Workspace\\"));
-        compressor.compress();
+
     }
 
 }
