@@ -21,18 +21,77 @@ public class RowsColumnsChanger implements Modifable {
             Path tempFilePath = Files.createTempFile(file.getParentFile().toPath(), "temp_" , null);
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFilePath.toFile()));
 
-            int i = 0;
-            String line = bufferedReader.readLine().split(",")[0] + (56==i?"":",");
-            while(line != null) {
-                writer.write(line);
-                line = bufferedReader.readLine().split(",")[0] + (56==i?"":",");
+            for (int i = 0; i < getColumnsNumber(file); i++) {
+                writer.write(readCsvColumnAsALine(file, i).toString());
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
 
         return null;
+    }
+
+    private StringBuilder readCsvColumnAsALine(File file, int column) {
+        try (
+                InputStream inputStream = new FileInputStream(file);
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8));
+        ) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = bufferedReader.readLine();
+
+            while(line != null) {
+                //stringBuilder.append(line.split(",")[column]).append(",");
+                stringBuilder.append(getColumnFromLine(line, column)).append(",");
+                line = bufferedReader.readLine();
+            }
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
+            stringBuilder.append("\n");
+
+            return stringBuilder;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private int getColumnsNumber(File file) {
+        try (
+                InputStream inputStream = new FileInputStream(file);
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8));
+        ) {
+            return bufferedReader.readLine().split(",").length;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public String getColumnFromLine(String line, int columnIndex) {
+        int lineLength = line.length();
+        int commaCounter = 0;
+        int startIndex = 0;
+        for (int i = 0; i < line.length(); i++) {
+            if(commaCounter == columnIndex) {
+                startIndex = i;
+                break;
+            }
+
+            if(line.charAt(i) == ',')
+                commaCounter++;
+        }
+
+        int charCounter = 0;
+        StringBuilder stringBuilder = new StringBuilder();
+        while(startIndex + charCounter < lineLength && line.charAt(startIndex + charCounter) != ',') {
+            stringBuilder.append(line.charAt(startIndex + charCounter));
+            charCounter++;
+        }
+
+        return stringBuilder.toString();
     }
     @Override
     public File makeCopy(File file) {
