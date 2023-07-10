@@ -5,6 +5,8 @@ import lombok.Setter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Getter
 @Setter
@@ -90,8 +92,36 @@ public class CSV implements Transpositionable, Saveable {
 
 
     @Override
-    public void saveToFile() {
+    public File saveToFile() {
+        try {
+            Path tempFilePath = Files.createTempFile(file.getParentFile().toPath(), null , null);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFilePath.toFile()));
 
+            for (int row = 0; row < height; row++) {
+                writeLine(writer, row);
+                if(row + 1 < height) writer.write("\n");
+            }
+
+            writer.close();
+
+            return tempFilePath.toFile();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void writeLine(BufferedWriter writer, int row) throws IOException {
+        StringBuffer stringBuffer = new StringBuffer();
+
+        for (int i = 0; i < width; i++) {
+            stringBuffer.append(array[row][i]);
+            stringBuffer.append(",");
+        }
+
+        stringBuffer.deleteCharAt(stringBuffer.lastIndexOf(","));
+
+
+        writer.write(stringBuffer.toString());
     }
 
     @Override

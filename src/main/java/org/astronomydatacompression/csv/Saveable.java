@@ -1,5 +1,7 @@
 package org.astronomydatacompression.csv;
 
+import java.io.File;
+
 public interface Saveable {
-    void saveToFile();
+    File saveToFile();
 }
