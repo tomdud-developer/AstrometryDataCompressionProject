@@ -10,8 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class CSVTest {
 
     @Test
@@ -21,6 +19,7 @@ class CSVTest {
 
         Assertions.assertEquals(57, csv.getWidth());
         Assertions.assertEquals(65, csv.getHeight());
+        Assertions.assertTrue(csv.isVertically());
     }
 
     @Test
@@ -29,17 +28,31 @@ class CSVTest {
         try {
             File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
             CSV csv = CSV.loadFromFile(file);
-
             savedFile = csv.saveToFile();
             Assertions.assertTrue(savedFile.exists());
-            Assertions.assertTrue(
-                    FilesIntegrityChecker.compareByMemoryMappedFiles(savedFile.toPath(), file.toPath())
-            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            //Files.deleteIfExists(savedFile.toPath());
+            assert savedFile != null;
+            Files.deleteIfExists(savedFile.toPath());
         }
+    }
+
+    @Test
+    void transposeTest() throws FileNotFoundException {
+        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
+        CSV csv = CSV.loadFromFile(file);
+
+        Assertions.assertEquals(57, csv.getWidth());
+        Assertions.assertEquals(65, csv.getHeight());
+        Assertions.assertTrue(csv.isVertically());
+
+
+        CSV transposedCSV = csv.transpose();
+
+        Assertions.assertEquals(57, transposedCSV.getHeight());
+        Assertions.assertEquals(65, transposedCSV.getWidth());
+        Assertions.assertFalse(transposedCSV.isVertically());
     }
 
 

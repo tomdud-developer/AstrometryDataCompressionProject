@@ -15,6 +15,10 @@ public class CSV implements Transpositionable, Saveable {
     private String[][] array;
     private int width;
     private int height;
+
+    /**
+     * True means the descriptions are in first row
+     */
     private boolean isVertically;
 
     private CSV() { }
@@ -125,8 +129,21 @@ public class CSV implements Transpositionable, Saveable {
     }
 
     @Override
-    public CSV transpose(CSV csv) {
-        return null;
+    public CSV transpose() {
+        CSV transposedCSV = new CSV();
+
+        String[][] transposedArray = new String[width][height];
+
+        for (int row = 0; row < height; row++)
+            for (int col = 0; col < width; col++)
+                transposedArray[col][row] = array[row][col];
+
+        transposedCSV.setArray(transposedArray);
+        transposedCSV.width = height;
+        transposedCSV.height = width;
+        transposedCSV.isVertically = !isVertically;
+
+        return transposedCSV;
     }
 
 
