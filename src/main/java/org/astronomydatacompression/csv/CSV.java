@@ -96,10 +96,10 @@ public class CSV implements Transpositionable, Saveable {
 
 
     @Override
-    public File saveToFile() {
+    public File saveToFile(Path path) {
         try {
-            Path tempFilePath = Files.createTempFile(file.getParentFile().toPath(), null , null);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFilePath.toFile()));
+            Path createdFilePath = Files.createFile(path);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(createdFilePath.toFile()));
 
             for (int row = 0; row < height; row++) {
                 writeLine(writer, row);
@@ -108,7 +108,7 @@ public class CSV implements Transpositionable, Saveable {
 
             writer.close();
 
-            return tempFilePath.toFile();
+            return createdFilePath.toFile();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }

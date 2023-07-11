@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 class CSVTest {
 
@@ -28,7 +29,8 @@ class CSVTest {
         try {
             File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
             CSV csv = CSV.loadFromFile(file);
-            savedFile = csv.saveToFile();
+            String newFileName = "modified_" + file.getName();
+            savedFile = csv.saveToFile(Paths.get(file.getParentFile().getPath(), newFileName));
             Assertions.assertTrue(savedFile.exists());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -40,13 +42,12 @@ class CSVTest {
 
     @Test
     void transposeTest() throws FileNotFoundException {
-        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
+        File file = new File(getClass().getClassLoader().getResource("GaiaSource_000-015-046.csv").getPath());
         CSV csv = CSV.loadFromFile(file);
 
         Assertions.assertEquals(57, csv.getWidth());
         Assertions.assertEquals(65, csv.getHeight());
         Assertions.assertTrue(csv.isVertically());
-
 
         CSV transposedCSV = csv.transpose();
 
