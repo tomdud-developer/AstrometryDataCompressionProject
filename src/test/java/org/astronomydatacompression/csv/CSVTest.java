@@ -42,7 +42,7 @@ class CSVTest {
 
     @Test
     void transposeTest() throws FileNotFoundException {
-        File file = new File(getClass().getClassLoader().getResource("GaiaSource_000-015-046.csv").getPath());
+        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
         CSV csv = CSV.loadFromFile(file);
 
         Assertions.assertEquals(57, csv.getWidth());

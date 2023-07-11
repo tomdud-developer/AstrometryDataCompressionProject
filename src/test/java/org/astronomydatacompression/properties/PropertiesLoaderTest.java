@@ -3,6 +3,7 @@ package org.astronomydatacompression.properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class PropertiesLoaderTest {
@@ -39,6 +40,17 @@ class PropertiesLoaderTest {
     void getListOfValuesDefinedInArray() {
         List<String> givenValue = PropertiesLoader.INSTANCE.getListOfValuesDefinedInArray(PropertiesType.INTERNAL, "test.arrayProps");
         List<String> correctValue = List.of("testProperty1", "testProperty2", "testProperty3");
+        Assertions.assertArrayEquals(correctValue.toArray(), givenValue.toArray());
+    }
+
+    @Test
+    void getListOfValuesSeparatedByCommaDefinedInArray() {
+        List<List<String>> givenValue = PropertiesLoader.INSTANCE.getListOfValuesSeparatedByCommaDefinedInArray(PropertiesType.INTERNAL, "test.arrayCommaProps");
+        List<List<String>> correctValue = new ArrayList<>();
+        correctValue.add(List.of("testProperty1", "testProperty2", "testProperty3"));
+        correctValue.add(new ArrayList<>());
+        correctValue.add(List.of("testProperty1", "testProperty2", "testProperty3"));
+
         Assertions.assertArrayEquals(correctValue.toArray(), givenValue.toArray());
     }
 }
