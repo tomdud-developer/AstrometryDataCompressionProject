@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class JavaFxController {
+
     @FXML
     private BarChart<String, Number> compressionTimeBarChart;
     @FXML

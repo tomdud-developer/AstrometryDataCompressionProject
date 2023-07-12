@@ -1,5 +1,7 @@
 package org.astronomydatacompression.properties;
 
+import org.astronomydatacompression.csv.CSVModifier;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +72,23 @@ public class PropertiesLoader implements PropertiesLoaderInterface {
 
         return listOfValues;
     }
+
+
+    public List<List<String>> getListOfValuesSeparatedByCommaDefinedInArray(PropertiesType type, String key) {
+        List<String> stringValues = getListOfValuesDefinedInArray(type, key);
+        List<List<String>> listOfListOfSeparatedByCommaValues = new ArrayList<>();
+
+        for(String propertiesSeparatedByComma : stringValues) {
+            List<String> propertiesList =  Arrays.stream(propertiesSeparatedByComma.split(",")).toList();
+            if(propertiesList.isEmpty() || propertiesList.get(0).isEmpty())
+                listOfListOfSeparatedByCommaValues.add(new ArrayList<>());
+            else
+                listOfListOfSeparatedByCommaValues.add(propertiesList);
+        }
+
+        return listOfListOfSeparatedByCommaValues;
+    }
+
 
 
 }

@@ -3,6 +3,8 @@ package org.astronomydatacompression.session;
 import org.astronomydatacompression.compression.Compressor;
 import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
+import org.astronomydatacompression.csv.CSV;
+import org.astronomydatacompression.csv.CSVModifier;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
@@ -10,13 +12,15 @@ import org.astronomydatacompression.statistics.DecompressionStatistics;
 import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,7 @@ public class Session implements Runnable {
     private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
     private final List<DecompressionStatistics> decompressionStatistics = new ArrayList<>();
     private final List<Compressor> compressors = new ArrayList<>();
+    private List<CSVModifier> modifiersList;
     private SessionStatistics sessionStatistics;
 
     public Session() {
@@ -41,9 +46,10 @@ public class Session implements Runnable {
     private String generateSessionId() {
         Random random = new Random();
         String randomLong = String.valueOf(random.nextLong(10000L, 1000000000L));
-        String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        LocalTime currentTime = LocalTime.now();
+        String formattedTime = currentTime.format(DateTimeFormatter.ofPattern("HH-mm-ss"));
 
-        return "SESSION_ID_" + randomLong + "_" + date;
+        return "SESSION_ID_" + randomLong + "_" + formattedTime;
     }
 
     public String getSESSION_ID() {
@@ -67,6 +73,10 @@ public class Session implements Runnable {
         }
     }
 
+    public void setModifiersList(List<CSVModifier> modifiersList) {
+        this.modifiersList = modifiersList;
+    }
+
     private void setMethodsList() {
         List<String> methodsStringList = PropertiesLoader.INSTANCE.getListOfValuesSepratedByComma(PropertiesType.EXTERNAL, "session.methods");
         List<CompressMethod> methodsList = new ArrayList<>();
@@ -74,10 +84,6 @@ public class Session implements Runnable {
             methodsList.add(CompressMethod.valueOf(methodName));
         }
         this.methodsList = methodsList;
-    }
-
-    public List<CompressMethod> getMethodsList() {
-        return methodsList;
     }
     
     public boolean isShouldBeParallelComputing() {
@@ -88,6 +94,9 @@ public class Session implements Runnable {
     public void run() {
         System.out.println(String.format("Session %s was started.", SESSION_ID));
         createWorkingDirectory();
+        copyFileToSessionDirectory();
+        if(!modifiersList.isEmpty())
+            modifyFileByModifiers();
 
         System.out.println("Create Compression Threads.");
         List<Thread> threads = new ArrayList<>();
@@ -113,6 +122,44 @@ public class Session implements Runnable {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void modifyFileByModifiers() {
+        try {
+            CSV orgCSV = CSV.loadFromFile(fileToCompress);
+            CSV modifiedCSV = applyModifiersChain(orgCSV);
+            String newFileName = "";
+            for (CSVModifier modifier : modifiersList)
+                newFileName += (modifier.name().substring(0,2) + "_");
+
+            newFileName += orgCSV.getFile().getName();
+            File savedFile = modifiedCSV.saveToFile(
+                    Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName));
+            modifiedCSV.setFile(savedFile);
+
+            fileToCompress = savedFile;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CSV applyModifiersChain(CSV orgCSV) {
+        CSV csv = orgCSV;
+
+        if(modifiersList.contains(CSVModifier.TRANSPOSE))
+            csv = orgCSV.transpose();
+
+        return csv;
+    }
+
+    private void copyFileToSessionDirectory() {
+        Path copiedFilePath = null;
+        try {
+            copiedFilePath = Files.copy(fileToCompress.toPath(), Path.of(workingDirectoryPath.toString(), fileToCompress.getName()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        fileToCompress = copiedFilePath.toFile();
     }
 
     private void generateSessionStatistics() {
@@ -174,10 +221,10 @@ public class Session implements Runnable {
                         ### Session informations ###
                         Your session ID is %s
                         Working directory: %s
-                        File to compressor: %s
+                        File for compressor: %s
                         Chosen Methods: %s""",
                 SESSION_ID, workingDirectoryPath, fileToCompress.getPath(),
-                methodsList.stream().map(Enum::toString).reduce((info, x) -> info += x).get()
+                methodsList.stream().map(Enum::toString).reduce((info, x) -> info += (x + " ") ).get()
         );
     }
 
