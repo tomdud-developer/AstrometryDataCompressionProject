@@ -7,10 +7,13 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ListView;
+import javafx.stage.FileChooser;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
 import org.astronomydatacompression.statistics.SessionStatistics;
+import org.astronomydatacompression.statistics.StatisticsCSVPrinter;
 
+import java.io.File;
 import java.util.List;
 import java.util.function.Function;
 
@@ -104,6 +107,18 @@ public class JavaFxController {
 
             barChart.getXAxis().setAnimated(false);
             barChart.getData().add(series);
+        }
+    }
+
+    public void saveStatisticsButtonClick() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save statistics");
+        fileChooser.setInitialFileName("statistics");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File selectedFile = fileChooser.showSaveDialog(null);
+        if (selectedFile != null) {
+            StatisticsCSVPrinter statisticsCSVPrinter = new StatisticsCSVPrinter(sessionStatisticsList);
+            statisticsCSVPrinter.saveToPath(selectedFile.toPath());
         }
     }
 }
