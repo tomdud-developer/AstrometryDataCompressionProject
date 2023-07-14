@@ -19,7 +19,11 @@ public class SessionStatistics {
     private final double originalFileSizeInMB;
     private final List<CompressMethod> compressMethodList;
 
-    public SessionStatistics(String SESSION_ID, File originalFile, List<CompressionStatistics> compressionStatistics, List<DecompressionStatistics> decompressionStatistics, List<CompressMethod> compressMethodList) {
+    public SessionStatistics(String SESSION_ID,
+                             File originalFile,
+                             List<CompressionStatistics> compressionStatistics,
+                             List<DecompressionStatistics> decompressionStatistics,
+                             List<CompressMethod> compressMethodList) {
         this.SESSION_ID = SESSION_ID;
         this.originalFile = originalFile;
         this.compressionStatistics = compressionStatistics;
