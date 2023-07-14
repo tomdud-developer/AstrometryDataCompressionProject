@@ -85,8 +85,9 @@ class StatisticsCSVPrinterTest {
         }
         String fileLines[] = fileContent.split("\n");
 
-        Assertions.assertEquals("123", fileLines[0]);
+        Assertions.assertEquals("### Session ID: TEST_SESSION_ID_1 ###", fileLines[0]);
 
+        System.out.println(fileContent);
 
     }
 
