@@ -5,6 +5,7 @@ import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.csv.CSV;
 import org.astronomydatacompression.csv.CSVModifier;
+import org.astronomydatacompression.csv.Transformer;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
@@ -131,14 +132,15 @@ public class Session implements Runnable {
         try {
             CSV orgCSV = CSV.loadFromFile(fileToCompress);
 
+            Transformer transformer = new Transformer(orgCSV);
             long modifyStartTime = System.nanoTime();
-            CSV modifiedCSV = applyModifiersChain(orgCSV);
+            CSV modifiedCSV = applyModifiersChain(orgCSV, transformer);
             long modifyTime = System.nanoTime() - modifyStartTime;
 
             fileToCompress = createNewFileAfterModifiers(orgCSV, modifiedCSV);
 
             long demodifyStartTime = System.nanoTime();
-            CSV demodifyCSV = applyDemodifiersChain(modifiedCSV);
+            CSV demodifyCSV = applyDemodifiersChain(modifiedCSV, transformer);
             long demodifyTime = System.nanoTime() - demodifyStartTime;
 
             long checkEqualsStartTime = System.nanoTime();
@@ -155,9 +157,13 @@ public class Session implements Runnable {
         }
     }
 
-    private CSV applyModifiersChain(CSV orgCSV) {
+    private CSV applyModifiersChain(CSV orgCSV, Transformer transformer) {
         CSV csv = orgCSV;
 
+        if(modifiersList.contains(CSVModifier.TRANSFORM_BOOLEANS))
+            csv = transformer.transformBoolean();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
+            csv = transformer.transformNotAvailable();
         if(modifiersList.contains(CSVModifier.TRANSPOSE))
             csv = orgCSV.transpose();
 
@@ -167,7 +173,7 @@ public class Session implements Runnable {
     private File createNewFileAfterModifiers(CSV orgCSV, CSV modifiedCSV) {
         String newFileName = "";
         for (CSVModifier modifier : modifiersList)
-            newFileName += (modifier.name().substring(0,2) + "_");
+            newFileName += (modifier.getShortName() + "_");
 
         newFileName += orgCSV.getFile().getName();
         File savedFile = modifiedCSV.saveToFile(
@@ -177,11 +183,18 @@ public class Session implements Runnable {
         return savedFile;
     }
 
-    private CSV applyDemodifiersChain(CSV modifiedCSV) {
+    private CSV applyDemodifiersChain(CSV modifiedCSV, Transformer transformer) {
         CSV csv = modifiedCSV;
+        transformer.setModifiedCSV(modifiedCSV);
 
-        if(modifiersList.contains(CSVModifier.TRANSPOSE))
-            csv = modifiedCSV.transpose();
+        if(modifiersList.contains(CSVModifier.TRANSPOSE)) {
+            csv = csv.transpose();
+            transformer.setModifiedCSV(csv);
+        }
+        if(modifiersList.contains(CSVModifier.TRANSFORM_BOOLEANS))
+            csv = transformer.revertTransformBoolean();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
+            csv = transformer.revertTransformNotAvailable();
 
         return csv;
     }

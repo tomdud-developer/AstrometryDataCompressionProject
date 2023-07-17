@@ -14,6 +14,10 @@ public class Transformer implements DataTransformer {
         this.transformedCSV = orgCSV.copy();
     }
 
+    public void setModifiedCSV(CSV csv) {
+        this.transformedCSV = csv;
+    }
+
     @Override
     public CSV transformNotAvailable() {
         checkVerticality(transformedCSV);
