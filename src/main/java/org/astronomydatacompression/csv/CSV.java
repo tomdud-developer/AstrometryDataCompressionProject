@@ -169,4 +169,20 @@ public class CSV implements Transpositionable, Saveable {
         result = 31 * result + (isVertically ? 1 : 0);
         return result;
     }
+
+    public CSV copy() {
+        CSV csv = new CSV();
+        csv.isVertically = isVertically;
+        csv.width = width;
+        csv.height = height;
+        csv.array = new String[height][width];
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                csv.array[i][j] = String.valueOf(array[i][j]);
+            }
+        }
+
+        return csv;
+    }
 }

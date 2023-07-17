@@ -69,4 +69,17 @@ class CSVTest {
         Assertions.assertTrue(csv.equals(demodifiedCSV));
         Assertions.assertTrue(demodifiedCSV.equals(csv));
     }
+
+    @Test
+    void copy() throws FileNotFoundException {
+        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
+        CSV csv = CSV.loadFromFile(file);
+
+        CSV copiedCSV = csv.copy();
+
+        Assertions.assertEquals(copiedCSV.getArray()[0][0], csv.getArray()[0][0]);
+        copiedCSV.getArray()[0][0] = "x";
+        Assertions.assertNotEquals(copiedCSV.getArray()[0][0], csv.getArray()[0][0]);
+
+    }
 }
