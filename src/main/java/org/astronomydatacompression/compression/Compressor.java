@@ -26,6 +26,19 @@ public abstract class Compressor implements Compressable, Runnable {
         this.defaultFileExtension = defaultFileExtension;
     }
 
+    @Override
+    public void run() {
+        try {
+            System.out.println("Start compress method " + getMethod().toString());
+            compressionStatistics = compress(fileToCompress);
+
+            System.out.println("Start decompress method " + getMethod().toString());
+            decompressionStatistics = deCompress(compressionStatistics.getCompressedFile());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void setFileToCompress(File fileToCompress) {
         this.fileToCompress = fileToCompress;
     }
@@ -153,17 +166,6 @@ public abstract class Compressor implements Compressable, Runnable {
         return decompressionStatistics;
     }
 
-    @Override
-    public void run() {
-        try {
-            System.out.println("Start compress method " + getMethod().toString());
-            compressionStatistics = compress(fileToCompress);
 
-            System.out.println("Start decompress method " + getMethod().toString());
-            decompressionStatistics = deCompress(compressionStatistics.getCompressedFile());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }
