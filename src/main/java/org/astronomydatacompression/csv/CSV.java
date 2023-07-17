@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 @Getter
 @Setter
@@ -33,6 +34,64 @@ public class CSV implements Transpositionable, Saveable {
         csv.readCSV();
 
         return csv;
+    }
+
+    @Override
+    public File saveToFile(Path path) {
+        try {
+            Path createdFilePath = Files.createFile(path);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(createdFilePath.toFile()));
+
+            for (int row = 0; row < height; row++) {
+                writeLine(writer, row);
+                if(row + 1 < height) writer.write("\n");
+            }
+
+            writer.close();
+
+            return createdFilePath.toFile();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CSV transpose() {
+        CSV transposedCSV = new CSV();
+
+        String[][] transposedArray = new String[width][height];
+
+        for (int row = 0; row < height; row++)
+            for (int col = 0; col < width; col++)
+                transposedArray[col][row] = array[row][col];
+
+        transposedCSV.setArray(transposedArray);
+        transposedCSV.width = height;
+        transposedCSV.height = width;
+        transposedCSV.isVertically = !isVertically;
+
+        return transposedCSV;
+    }
+
+    private void readCSV() {
+        try (
+                InputStream inputStream = new FileInputStream(file);
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8));
+        ) {
+            String line = bufferedReader.readLine();
+
+            int row = 0;
+            while(line != null) {
+                array[row] = line.split(",");
+                line = bufferedReader.readLine();
+                row++;
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private void initializeArrayLengthWidth() {
@@ -73,47 +132,6 @@ public class CSV implements Transpositionable, Saveable {
         return Character.isLetter(secondColumnFirstCharacter);
     }
 
-    private void readCSV() {
-        try (
-                InputStream inputStream = new FileInputStream(file);
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(
-                        new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8));
-        ) {
-            String line = bufferedReader.readLine();
-
-            int row = 0;
-            while(line != null) {
-                array[row] = line.split(",");
-                line = bufferedReader.readLine();
-                row++;
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-
-    @Override
-    public File saveToFile(Path path) {
-        try {
-            Path createdFilePath = Files.createFile(path);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(createdFilePath.toFile()));
-
-            for (int row = 0; row < height; row++) {
-                writeLine(writer, row);
-                if(row + 1 < height) writer.write("\n");
-            }
-
-            writer.close();
-
-            return createdFilePath.toFile();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
     private void writeLine(BufferedWriter writer, int row) throws IOException {
         StringBuffer stringBuffer = new StringBuffer();
 
@@ -129,22 +147,26 @@ public class CSV implements Transpositionable, Saveable {
     }
 
     @Override
-    public CSV transpose() {
-        CSV transposedCSV = new CSV();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        String[][] transposedArray = new String[width][height];
+        CSV csv = (CSV) o;
 
-        for (int row = 0; row < height; row++)
-            for (int col = 0; col < width; col++)
-                transposedArray[col][row] = array[row][col];
+        if (width != csv.width) return false;
+        if (height != csv.height) return false;
+        if (isVertically != csv.isVertically) return false;
 
-        transposedCSV.setArray(transposedArray);
-        transposedCSV.width = height;
-        transposedCSV.height = width;
-        transposedCSV.isVertically = !isVertically;
-
-        return transposedCSV;
+        return Arrays.deepEquals(array, csv.array);
     }
 
-
+    @Override
+    public int hashCode() {
+        int result = 3;
+        result = 31 * result + Arrays.deepHashCode(array);
+        result = 31 * result + width;
+        result = 31 * result + height;
+        result = 31 * result + (isVertically ? 1 : 0);
+        return result;
+    }
 }
