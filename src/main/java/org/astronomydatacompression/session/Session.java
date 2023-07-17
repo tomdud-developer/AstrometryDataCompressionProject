@@ -45,7 +45,7 @@ public class Session implements Runnable {
     public Session() {
         SESSION_ID = generateSessionId();
         setMethodsList();
-        modificationStatistics = new ModificationStatistics(0,0, Collections.emptyList());
+        modificationStatistics = new ModificationStatistics(0,0,0, Collections.emptyList());
     }
     private String generateSessionId() {
         Random random = new Random();
@@ -142,9 +142,14 @@ public class Session implements Runnable {
             CSV demodifyCSV = applyDemodifiersChain(modifiedCSV);
             long demodifyTime = System.nanoTime() - demodifyStartTime;
 
-            this.modificationStatistics = new ModificationStatistics(modifyTime, demodifyTime, modifiersList);
+            long checkEqualsStartTime = System.nanoTime();
+            if(!orgCSV.equals(demodifyCSV))
+                throw new RuntimeException("CSV after demodfiers is not the same with original csv");
+            long checkEqualsTime = System.nanoTime() - checkEqualsStartTime;
 
-            System.out.println("Modification Statistics: " + modificationStatistics.getModificationTimeInSeconds() + "     " + modificationStatistics.getDemodificationTimeInSeconds());
+            this.modificationStatistics = new ModificationStatistics(modifyTime, demodifyTime, checkEqualsTime, modifiersList);
+
+            System.out.println(modificationStatistics);
 
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

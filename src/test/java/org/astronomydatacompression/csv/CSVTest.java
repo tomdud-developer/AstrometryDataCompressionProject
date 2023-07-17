@@ -57,4 +57,16 @@ class CSVTest {
     }
 
 
+    @Test
+    void testEquals() throws FileNotFoundException {
+        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
+        CSV csv = CSV.loadFromFile(file);
+
+        CSV modfifiedCSV = csv.transpose();
+        CSV demodifiedCSV = modfifiedCSV.transpose();
+
+        Assertions.assertTrue(csv.equals(csv));
+        Assertions.assertTrue(csv.equals(demodifiedCSV));
+        Assertions.assertTrue(demodifiedCSV.equals(csv));
+    }
 }
