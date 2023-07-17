@@ -9,6 +9,7 @@ import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
+import org.astronomydatacompression.statistics.ModificationStatistics;
 import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -38,10 +40,12 @@ public class Session implements Runnable {
     private final List<Compressor> compressors = new ArrayList<>();
     private List<CSVModifier> modifiersList;
     private SessionStatistics sessionStatistics;
+    private ModificationStatistics modificationStatistics;
 
     public Session() {
         SESSION_ID = generateSessionId();
         setMethodsList();
+        modificationStatistics = new ModificationStatistics(0,0, Collections.emptyList());
     }
     private String generateSessionId() {
         Random random = new Random();
@@ -127,17 +131,21 @@ public class Session implements Runnable {
     private void modifyFileByModifiers() {
         try {
             CSV orgCSV = CSV.loadFromFile(fileToCompress);
+
+            long modifyStartTime = System.nanoTime();
             CSV modifiedCSV = applyModifiersChain(orgCSV);
-            String newFileName = "";
-            for (CSVModifier modifier : modifiersList)
-                newFileName += (modifier.name().substring(0,2) + "_");
+            long modifyTime = System.nanoTime() - modifyStartTime;
 
-            newFileName += orgCSV.getFile().getName();
-            File savedFile = modifiedCSV.saveToFile(
-                    Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName));
-            modifiedCSV.setFile(savedFile);
+            fileToCompress = createNewFileAfterModifiers(orgCSV, modifiedCSV);
 
-            fileToCompress = savedFile;
+            long demodifyStartTime = System.nanoTime();
+            CSV demodifyCSV = applyDemodifiersChain(modifiedCSV);
+            long demodifyTime = System.nanoTime() - demodifyStartTime;
+
+            this.modificationStatistics = new ModificationStatistics(modifyTime, demodifyTime, modifiersList);
+
+            System.out.println("Modification Statistics: " + modificationStatistics.getModificationTimeInSeconds() + "     " + modificationStatistics.getDemodificationTimeInSeconds());
+
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -148,6 +156,28 @@ public class Session implements Runnable {
 
         if(modifiersList.contains(CSVModifier.TRANSPOSE))
             csv = orgCSV.transpose();
+
+        return csv;
+    }
+
+    private File createNewFileAfterModifiers(CSV orgCSV, CSV modifiedCSV) {
+        String newFileName = "";
+        for (CSVModifier modifier : modifiersList)
+            newFileName += (modifier.name().substring(0,2) + "_");
+
+        newFileName += orgCSV.getFile().getName();
+        File savedFile = modifiedCSV.saveToFile(
+                Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName));
+        modifiedCSV.setFile(savedFile);
+
+        return savedFile;
+    }
+
+    private CSV applyDemodifiersChain(CSV modifiedCSV) {
+        CSV csv = modifiedCSV;
+
+        if(modifiersList.contains(CSVModifier.TRANSPOSE))
+            csv = modifiedCSV.transpose();
 
         return csv;
     }
