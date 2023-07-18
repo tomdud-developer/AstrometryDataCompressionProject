@@ -2,15 +2,17 @@ package org.astronomydatacompression.csv;
 
 public class Transformer implements DataTransformer {
 
-    private CSV orgCSV;
+    private final CSV orgCSV;
     private CSV transformedCSV;
 
     private String solutionID = null;
+    private String refEpochs = null;
 
     public final int solution_id_column = 1 - 1;
     public final int astrometric_primary_flag_column = 34 - 1;
     public final int phot_variable_flag_column = 53 - 1;
-    public final int duplicated_source = 40 - 1;
+    public final int duplicated_source_column = 40 - 1;
+    public final int ref_epochs_column = 4 - 1;
 
     public Transformer(CSV orgCSV) {
         this.orgCSV = orgCSV;
@@ -88,10 +90,10 @@ public class Transformer implements DataTransformer {
             else if(arr[i][astrometric_primary_flag_column].equals("false"))
                 arr[i][astrometric_primary_flag_column] = "0";
 
-            if(arr[i][duplicated_source].equals("true"))
-                arr[i][duplicated_source] = "1";
-            else if(arr[i][duplicated_source].equals("false"))
-                arr[i][duplicated_source] = "0";
+            if(arr[i][duplicated_source_column].equals("true"))
+                arr[i][duplicated_source_column] = "1";
+            else if(arr[i][duplicated_source_column].equals("false"))
+                arr[i][duplicated_source_column] = "0";
         }
 
         return transformedCSV;
@@ -109,10 +111,36 @@ public class Transformer implements DataTransformer {
             else if(arr[i][astrometric_primary_flag_column].equals("0"))
                 arr[i][astrometric_primary_flag_column] = "false";
 
-            if(arr[i][duplicated_source].equals("1"))
-                arr[i][duplicated_source] = "true";
-            else if(arr[i][duplicated_source].equals("0"))
-                arr[i][duplicated_source] = "false";
+            if(arr[i][duplicated_source_column].equals("1"))
+                arr[i][duplicated_source_column] = "true";
+            else if(arr[i][duplicated_source_column].equals("0"))
+                arr[i][duplicated_source_column] = "false";
+        }
+
+        return transformedCSV;
+    }
+
+    @Override
+    public CSV transformRefEpochs() {
+        checkVerticality(transformedCSV);
+
+        String[][] arr = transformedCSV.getArray();
+        refEpochs = arr[1][ref_epochs_column];
+
+        for (int i = 1; i < transformedCSV.getHeight(); i++) {
+            arr[i][ref_epochs_column] = "";
+        }
+
+        return transformedCSV;
+    }
+
+    @Override
+    public CSV revertTransformRefEpochs() {
+        checkVerticality(transformedCSV);
+        String[][] arr = transformedCSV.getArray();
+
+        for (int i = 1; i < transformedCSV.getHeight(); i++) {
+            arr[i][ref_epochs_column] = refEpochs;
         }
 
         return transformedCSV;

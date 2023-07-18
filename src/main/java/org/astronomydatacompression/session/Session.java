@@ -139,16 +139,16 @@ public class Session implements Runnable {
 
             fileToCompress = createNewFileAfterModifiers(orgCSV, modifiedCSV);
 
-            long demodifyStartTime = System.nanoTime();
-            CSV demodifyCSV = applyDemodifiersChain(modifiedCSV, transformer);
-            long demodifyTime = System.nanoTime() - demodifyStartTime;
+            long reversalStartTime = System.nanoTime();
+            CSV reversalCSV = applyReversalsChain(modifiedCSV, transformer);
+            long reversalTime = System.nanoTime() - reversalStartTime;
 
             long checkEqualsStartTime = System.nanoTime();
-            if(!orgCSV.equals(demodifyCSV))
-                throw new RuntimeException("CSV after demodfiers is not the same with original csv");
+            if(!orgCSV.equals(reversalCSV))
+                throw new RuntimeException("CSV after reversals is not the same with original csv");
             long checkEqualsTime = System.nanoTime() - checkEqualsStartTime;
 
-            this.modificationStatistics = new ModificationStatistics(modifyTime, demodifyTime, checkEqualsTime, modifiersList);
+            this.modificationStatistics = new ModificationStatistics(modifyTime, reversalTime, checkEqualsTime, modifiersList);
 
             System.out.println(modificationStatistics);
 
@@ -166,6 +166,8 @@ public class Session implements Runnable {
             csv = transformer.transformNotAvailable();
         if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
             csv = transformer.transformID();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_REF_EPOCHS))
+            csv = transformer.transformRefEpochs();
         if(modifiersList.contains(CSVModifier.TRANSPOSE))
             csv = csv.transpose();
 
@@ -173,19 +175,19 @@ public class Session implements Runnable {
     }
 
     private File createNewFileAfterModifiers(CSV orgCSV, CSV modifiedCSV) {
-        String newFileName = "";
+        StringBuilder newFileName = new StringBuilder();
         for (CSVModifier modifier : modifiersList)
-            newFileName += (modifier.getShortName() + "_");
+            newFileName.append(modifier.getShortName()).append("_");
 
-        newFileName += orgCSV.getFile().getName();
+        newFileName.append(orgCSV.getFile().getName());
         File savedFile = modifiedCSV.saveToFile(
-                Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName));
+                Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName.toString()));
         modifiedCSV.setFile(savedFile);
 
         return savedFile;
     }
 
-    private CSV applyDemodifiersChain(CSV modifiedCSV, Transformer transformer) {
+    private CSV applyReversalsChain(CSV modifiedCSV, Transformer transformer) {
         CSV csv = modifiedCSV;
         transformer.setModifiedCSV(modifiedCSV);
 
@@ -199,6 +201,8 @@ public class Session implements Runnable {
             csv = transformer.revertTransformNotAvailable();
         if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
             csv = transformer.revertTransformID();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_REF_EPOCHS))
+            csv = transformer.revertTransformRefEpochs();
 
         return csv;
     }
@@ -215,10 +219,11 @@ public class Session implements Runnable {
 
     private void generateSessionStatistics() {
          sessionStatistics = new SessionStatistics(
-                SESSION_ID,
-                fileToCompress,
-                compressionStatistics,
-                decompressionStatistics,
+                 SESSION_ID,
+                 fileToCompress,
+                 modificationStatistics,
+                 compressionStatistics,
+                 decompressionStatistics,
                  compressors.stream().map(Compressor::getMethod).toList()
          );
     }
@@ -273,7 +278,8 @@ public class Session implements Runnable {
                         Your session ID is %s
                         Working directory: %s
                         File for compressor: %s
-                        Chosen Methods: %s""",
+                        Chosen Methods: %s
+                        """,
                 SESSION_ID, workingDirectoryPath, fileToCompress.getPath(),
                 methodsList.stream().map(Enum::toString).reduce((info, x) -> info += (x + " ") ).get()
         );

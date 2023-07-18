@@ -7,4 +7,6 @@ public interface DataTransformer {
     CSV revertTransformNotAvailable();
     CSV transformBoolean();
     CSV revertTransformBoolean();
+    CSV transformRefEpochs();
+    CSV revertTransformRefEpochs();
 }
