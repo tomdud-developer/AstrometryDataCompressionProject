@@ -44,6 +44,10 @@ public class StatisticsCSVPrinter implements Printable {
     private void writeSessionStatistic(SessionStatistics sessionStatistics, BufferedWriter writer) throws IOException {
         writer.write(String.format("### Session ID: %s ###", sessionStatistics.getSESSION_ID()));
         writer.write("\n");
+        writer.write("\n");
+
+        writer.write("\n");
+        writer.write("\n");
         writeCompressors(sessionStatistics.getCompressMethodList(), writer);
         writer.write("\n");
         writer.write("\n");
@@ -52,6 +56,22 @@ public class StatisticsCSVPrinter implements Printable {
         writer.write("\n");
         writeDecompressionStatistics(sessionStatistics.getDecompressionStatistics(), writer);
         writer.write("\n");
+    }
+
+    private void writeModificationStatistics(ModificationStatistics modificationStatistics, BufferedWriter writer) throws IOException {
+        writer.write("### Modification Statistics ###,");
+        modificationStatistics.getModifierList().forEach(m -> {
+            try {
+                writer.write(m.name() + ",");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        writer.write("Modifications time, Reversal time, Check integrity time");
+        writer.write("\n");
+        writer.write(modificationStatistics.getModificationTimeInSeconds() + ",");
+        writer.write(modificationStatistics.getReversalTimeInSeconds() + ",");
+        writer.write(modificationStatistics.getCheckEqualsTimeInSeconds() + "");
     }
 
     private void writeCompressors(List<CompressMethod> compressMethods, BufferedWriter writer) throws IOException {
