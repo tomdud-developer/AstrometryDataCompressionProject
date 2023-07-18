@@ -36,6 +36,10 @@ public class JavaFxController {
     @FXML
     private BarChart<String, Number> reversalAndDecompressionTimeBarChart;
     @FXML
+    private BarChart<String, Number> compressionAndDecompressionTimeBarChart;
+    @FXML
+    private BarChart<String, Number> modificationAndCompressionAndDecompressionAndReversalTimeBarChart;
+    @FXML
     private ListView<String> inputFileInformationListView;
     @FXML
     private ListView<String> compressorsInformationListView;
@@ -94,6 +98,8 @@ public class JavaFxController {
         updateDecompressionChart(decompressionSpeedBarChart, DecompressionStatistics::getDecompressionSpeedInMBPS);
         updateModificationAndCompressionChart(modificationAndCompressionTimeBarChart);
         updateReversalAndDecompressionChart(reversalAndDecompressionTimeBarChart);
+        updateCompressionAndDecompressionTimeBarChart(compressionAndDecompressionTimeBarChart);
+        updateModificationAndCompressionAndDecompressionAndReversalTimeBarChart(modificationAndCompressionAndDecompressionAndReversalTimeBarChart);
     }
 
     public void updateCompressionChart(BarChart<String, Number> barChart, Function<CompressionStatistics, Double> function) {
@@ -151,6 +157,47 @@ public class JavaFxController {
                                 decompressionStatistics.getCompressMethod().toString(),
                                 decompressionStatistics.getDecompressionTimeInSeconds() +
                                         sessionStatistics.getModificationStatistics().getReversalTimeInSeconds()
+                        )
+                );
+            }
+
+            barChart.getXAxis().setAnimated(false);
+            barChart.getData().add(series);
+        }
+    }
+
+    public void updateCompressionAndDecompressionTimeBarChart(BarChart<String, Number> barChart) {
+        for (SessionStatistics sessionStatistics : sessionStatisticsList) {
+            XYChart.Series series = new XYChart.Series();
+            series.setName(sessionStatistics.getOriginalFile().getName());
+            for (int i = 0; i < sessionStatistics.getCompressionStatistics().size(); i++) {
+                series.getData().add(
+                        new XYChart.Data(
+                                sessionStatistics.getCompressionStatistics().get(i).getCompressMethod().toString(),
+                                sessionStatistics.getCompressionStatistics().get(i).getCompressionTimeInSeconds() +
+                                sessionStatistics.getDecompressionStatistics().get(i).getDecompressionTimeInSeconds()
+                        )
+                );
+            }
+
+            barChart.getXAxis().setAnimated(false);
+            barChart.getData().add(series);
+        }
+    }
+
+    public void updateModificationAndCompressionAndDecompressionAndReversalTimeBarChart(BarChart<String, Number> barChart) {
+        for (SessionStatistics sessionStatistics : sessionStatisticsList) {
+            XYChart.Series series = new XYChart.Series();
+            series.setName(sessionStatistics.getOriginalFile().getName());
+            for (int i = 0; i < sessionStatistics.getCompressionStatistics().size(); i++) {
+                series.getData().add(
+                        new XYChart.Data(
+                                sessionStatistics.getCompressionStatistics().get(i).getCompressMethod().toString(),
+                                sessionStatistics.getCompressionStatistics().get(i).getCompressionTimeInSeconds() +
+                                sessionStatistics.getDecompressionStatistics().get(i).getDecompressionTimeInSeconds() +
+                                        sessionStatistics.getModificationStatistics().getModificationTimeInSeconds() +
+                                        sessionStatistics.getModificationStatistics().getReversalTimeInSeconds()
+
                         )
                 );
             }
