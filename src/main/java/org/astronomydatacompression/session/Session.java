@@ -164,8 +164,10 @@ public class Session implements Runnable {
             csv = transformer.transformBoolean();
         if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
             csv = transformer.transformNotAvailable();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
+            csv = transformer.transformID();
         if(modifiersList.contains(CSVModifier.TRANSPOSE))
-            csv = orgCSV.transpose();
+            csv = csv.transpose();
 
         return csv;
     }
@@ -195,6 +197,8 @@ public class Session implements Runnable {
             csv = transformer.revertTransformBoolean();
         if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
             csv = transformer.revertTransformNotAvailable();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
+            csv = transformer.revertTransformID();
 
         return csv;
     }
