@@ -87,6 +87,7 @@ public class CSV implements Transpositionable, Saveable {
                 array[row] = splitByComma(line);//line.split(",");
                 line = bufferedReader.readLine();
                 row++;
+                System.out.println(row);
             }
 
         } catch (Exception e) {
@@ -103,6 +104,7 @@ public class CSV implements Transpositionable, Saveable {
                 columns[columnIterator] = line.substring(begin, i);
                 begin = i + 1;
                 columnIterator++;
+
             }
         }
         columns[width-1] = line.substring(begin);

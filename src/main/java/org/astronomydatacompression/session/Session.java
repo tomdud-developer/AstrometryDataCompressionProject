@@ -5,7 +5,8 @@ import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.csv.CSV;
 import org.astronomydatacompression.csv.CSVModifier;
-import org.astronomydatacompression.csv.Transformer;
+import org.astronomydatacompression.csv.DR1Transformer;
+import org.astronomydatacompression.csv.DR3Transformer;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
@@ -24,7 +25,6 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -135,15 +135,16 @@ public class Session implements Runnable {
         try {
             CSV orgCSV = CSV.loadFromFile(orgFileBeforeModifiers);
 
-            Transformer transformer = new Transformer(orgCSV);
+            DR1Transformer dr1Transformer = new DR1Transformer(orgCSV);
+            DR3Transformer dr3Transformer = new DR3Transformer(orgCSV);
             long modifyStartTime = System.nanoTime();
-            CSV modifiedCSV = applyModifiersChain(orgCSV, transformer);
+            CSV modifiedCSV = applyModifiersChain(orgCSV, dr1Transformer, dr3Transformer);
             long modifyTime = System.nanoTime() - modifyStartTime;
 
             fileToCompress = createNewFileAfterModifiers(orgCSV, modifiedCSV);
 
             long reversalStartTime = System.nanoTime();
-            CSV reversalCSV = applyReversalsChain(modifiedCSV, transformer);
+            CSV reversalCSV = applyReversalsChain(modifiedCSV, dr1Transformer, dr3Transformer);
             long reversalTime = System.nanoTime() - reversalStartTime;
 
             long checkEqualsStartTime = System.nanoTime();
@@ -153,6 +154,9 @@ public class Session implements Runnable {
 
             this.modificationStatistics = new ModificationStatistics(fileToCompress, modifyTime, reversalTime, checkEqualsTime, modifiersList);
 
+            reversalCSV = null;
+            modifiedCSV = null;
+            orgCSV = null;
             System.out.println(modificationStatistics);
 
         } catch (FileNotFoundException e) {
@@ -160,19 +164,26 @@ public class Session implements Runnable {
         }
     }
 
-    private CSV applyModifiersChain(CSV orgCSV, Transformer transformer) {
+    private CSV applyModifiersChain(CSV orgCSV, DR1Transformer dr1Transformer, DR3Transformer dr3Transformer) {
         CSV csv = orgCSV;
 
+        if(modifiersList.contains(CSVModifier.TRANSFORM_DR3_ALL)) {
+            csv = dr3Transformer.applyAllTransforms();
+            dr1Transformer.setModifiedCSV(csv);
+        }
         if(modifiersList.contains(CSVModifier.TRANSFORM_BOOLEANS))
-            csv = transformer.transformBoolean();
+            csv = dr1Transformer.transformBoolean();
         if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
-            csv = transformer.transformNotAvailable();
+            csv = dr1Transformer.transformNotAvailable();
         if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
-            csv = transformer.transformID();
+            csv = dr1Transformer.transformID();
         if(modifiersList.contains(CSVModifier.TRANSFORM_REF_EPOCHS))
-            csv = transformer.transformRefEpochs();
+            csv = dr1Transformer.transformRefEpochs();
         if(modifiersList.contains(CSVModifier.TRANSPOSE))
             csv = csv.transpose();
+
+        dr1Transformer.setModifiedCSV(csv);
+        dr3Transformer.setModifiedCSV(csv);
 
         return csv;
     }
@@ -190,23 +201,29 @@ public class Session implements Runnable {
         return savedFile;
     }
 
-    private CSV applyReversalsChain(CSV modifiedCSV, Transformer transformer) {
+    private CSV applyReversalsChain(CSV modifiedCSV, DR1Transformer dr1Transformer, DR3Transformer dr3Transformer) {
         CSV csv = modifiedCSV;
-        transformer.setModifiedCSV(modifiedCSV);
+        dr1Transformer.setModifiedCSV(modifiedCSV);
 
         if(modifiersList.contains(CSVModifier.TRANSPOSE)) {
             csv = csv.transpose();
-            transformer.setModifiedCSV(csv);
+            dr1Transformer.setModifiedCSV(csv);
+            dr3Transformer.setModifiedCSV(csv);
+        }
+        if(modifiersList.contains(CSVModifier.TRANSFORM_DR3_ALL)) {
+            csv = dr3Transformer.applyAllRevertTransforms();
+            dr1Transformer.setModifiedCSV(csv);
         }
         if(modifiersList.contains(CSVModifier.TRANSFORM_BOOLEANS))
-            csv = transformer.revertTransformBoolean();
+            csv = dr1Transformer.revertTransformBoolean();
         if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
-            csv = transformer.revertTransformNotAvailable();
+            csv = dr1Transformer.revertTransformNotAvailable();
         if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
-            csv = transformer.revertTransformID();
+            csv = dr1Transformer.revertTransformID();
         if(modifiersList.contains(CSVModifier.TRANSFORM_REF_EPOCHS))
-            csv = transformer.revertTransformRefEpochs();
+            csv = dr1Transformer.revertTransformRefEpochs();
 
+        dr3Transformer.setModifiedCSV(csv);
         return csv;
     }
 
