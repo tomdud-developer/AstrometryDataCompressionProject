@@ -1,22 +1,24 @@
 package org.astronomydatacompression.csv;
 
-public class Transformer implements DataTransformer {
+public abstract class Transformer implements DataTransformer {
+    protected CSV orgCSV;
+    protected CSV transformedCSV;
 
-    private final CSV orgCSV;
-    private CSV transformedCSV;
-
-    private String solutionID = null;
-    private String refEpochs = null;
+    protected String solutionID = null;
+    protected String refEpochs = null;
 
     public final int solution_id_column = 1 - 1;
-    public final int astrometric_primary_flag_column = 34 - 1;
-    public final int phot_variable_flag_column = 53 - 1;
-    public final int duplicated_source_column = 40 - 1;
-    public final int ref_epochs_column = 4 - 1;
+    public final int phot_variable_flag_column;
+    public final int ref_epochs_column;
 
-    public Transformer(CSV orgCSV) {
-        this.orgCSV = orgCSV;
-        this.transformedCSV = orgCSV.copy();
+    private final String not_available_string;
+
+    public Transformer(int phot_variable_flag_column,
+                       String not_available_string,
+                       int ref_epochs_column) {
+        this.phot_variable_flag_column = phot_variable_flag_column;
+        this.not_available_string = not_available_string;
+        this.ref_epochs_column = ref_epochs_column;
     }
 
     public void setModifiedCSV(CSV csv) {
@@ -50,6 +52,10 @@ public class Transformer implements DataTransformer {
         return transformedCSV;
     }
 
+    protected void checkVerticality(CSV csv) throws RuntimeException {
+        if (!csv.isVertically()) throw new RuntimeException("CSV is not vertically");
+    }
+
     @Override
     public CSV transformNotAvailable() {
         checkVerticality(transformedCSV);
@@ -57,7 +63,7 @@ public class Transformer implements DataTransformer {
         String[][] arr = transformedCSV.getArray();
 
         for (int i = 1; i < transformedCSV.getHeight(); i++) {
-            if(arr[i][phot_variable_flag_column].equals("NOT_AVAILABLE"))
+            if(arr[i][phot_variable_flag_column].equals(not_available_string))
                 arr[i][phot_variable_flag_column] = "?";
         }
 
@@ -72,49 +78,7 @@ public class Transformer implements DataTransformer {
 
         for (int i = 1; i < transformedCSV.getHeight(); i++) {
             if(arr[i][phot_variable_flag_column].equals("?"))
-                arr[i][phot_variable_flag_column] = "NOT_AVAILABLE";
-        }
-
-        return transformedCSV;
-    }
-
-    @Override
-    public CSV transformBoolean() {
-        checkVerticality(transformedCSV);
-
-        String[][] arr = transformedCSV.getArray();
-
-        for (int i = 1; i < transformedCSV.getHeight(); i++) {
-            if(arr[i][astrometric_primary_flag_column].equals("true"))
-                arr[i][astrometric_primary_flag_column] = "1";
-            else if(arr[i][astrometric_primary_flag_column].equals("false"))
-                arr[i][astrometric_primary_flag_column] = "0";
-
-            if(arr[i][duplicated_source_column].equals("true"))
-                arr[i][duplicated_source_column] = "1";
-            else if(arr[i][duplicated_source_column].equals("false"))
-                arr[i][duplicated_source_column] = "0";
-        }
-
-        return transformedCSV;
-    }
-
-    @Override
-    public CSV revertTransformBoolean() {
-        checkVerticality(transformedCSV);
-
-        String[][] arr = transformedCSV.getArray();
-
-        for (int i = 1; i < transformedCSV.getHeight(); i++) {
-            if(arr[i][astrometric_primary_flag_column].equals("1"))
-                arr[i][astrometric_primary_flag_column] = "true";
-            else if(arr[i][astrometric_primary_flag_column].equals("0"))
-                arr[i][astrometric_primary_flag_column] = "false";
-
-            if(arr[i][duplicated_source_column].equals("1"))
-                arr[i][duplicated_source_column] = "true";
-            else if(arr[i][duplicated_source_column].equals("0"))
-                arr[i][duplicated_source_column] = "false";
+                arr[i][phot_variable_flag_column] = not_available_string;
         }
 
         return transformedCSV;
@@ -146,7 +110,4 @@ public class Transformer implements DataTransformer {
         return transformedCSV;
     }
 
-    private void checkVerticality(CSV csv) throws RuntimeException {
-        if (!csv.isVertically()) throw new RuntimeException("CSV is not vertically");
-    }
 }
