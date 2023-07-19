@@ -45,6 +45,7 @@ class StatisticsCSVPrinterTest {
         );
 
         ModificationStatistics modificationStatistics = new ModificationStatistics(
+                        testFile,
                         123,
                         123,
                         123,

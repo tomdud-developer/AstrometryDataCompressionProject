@@ -33,6 +33,7 @@ public class Session implements Runnable {
 
     private final String SESSION_ID;
     private Path workingDirectoryPath;
+    private File orgFileBeforeModifiers;
     private File fileToCompress;
     List<CompressMethod> methodsList;
     private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
@@ -45,7 +46,6 @@ public class Session implements Runnable {
     public Session() {
         SESSION_ID = generateSessionId();
         setMethodsList();
-        modificationStatistics = new ModificationStatistics(0,0,0, Collections.emptyList());
     }
     private String generateSessionId() {
         Random random = new Random();
@@ -71,7 +71,8 @@ public class Session implements Runnable {
     public void setFileToCompress(String fileNameToCompress) {
         try {
             Path filePathToCompress = Paths.get(workingDirectoryPath.toString(), fileNameToCompress);
-            fileToCompress = new File(filePathToCompress.toUri());
+            orgFileBeforeModifiers = new File(filePathToCompress.toUri());
+            fileToCompress = orgFileBeforeModifiers;
         } catch (InvalidPathException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
@@ -101,6 +102,8 @@ public class Session implements Runnable {
         copyFileToSessionDirectory();
         if(!modifiersList.isEmpty())
             modifyFileByModifiers();
+        else
+            this.modificationStatistics = new ModificationStatistics(orgFileBeforeModifiers, 0, 0, 0, modifiersList);
 
         System.out.println("Create Compression Threads.");
         List<Thread> threads = new ArrayList<>();
@@ -130,7 +133,7 @@ public class Session implements Runnable {
 
     private void modifyFileByModifiers() {
         try {
-            CSV orgCSV = CSV.loadFromFile(fileToCompress);
+            CSV orgCSV = CSV.loadFromFile(orgFileBeforeModifiers);
 
             Transformer transformer = new Transformer(orgCSV);
             long modifyStartTime = System.nanoTime();
@@ -148,7 +151,7 @@ public class Session implements Runnable {
                 throw new RuntimeException("CSV after reversals is not the same with original csv");
             long checkEqualsTime = System.nanoTime() - checkEqualsStartTime;
 
-            this.modificationStatistics = new ModificationStatistics(modifyTime, reversalTime, checkEqualsTime, modifiersList);
+            this.modificationStatistics = new ModificationStatistics(fileToCompress, modifyTime, reversalTime, checkEqualsTime, modifiersList);
 
             System.out.println(modificationStatistics);
 
@@ -215,12 +218,13 @@ public class Session implements Runnable {
             throw new RuntimeException(e);
         }
         fileToCompress = copiedFilePath.toFile();
+        orgFileBeforeModifiers = fileToCompress;
     }
 
     private void generateSessionStatistics() {
          sessionStatistics = new SessionStatistics(
                  SESSION_ID,
-                 fileToCompress,
+                 orgFileBeforeModifiers,
                  modificationStatistics,
                  compressionStatistics,
                  decompressionStatistics,

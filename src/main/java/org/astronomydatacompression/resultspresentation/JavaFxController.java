@@ -73,7 +73,8 @@ public class JavaFxController {
             informationsAboutFiles.addAll(
                     "Name: " + sessionStatistics.getOriginalFile().getName(),
                     "Extension: " + sessionStatistics.getOriginalFile().getName().split("\\.")[1],
-                    "Size: " + sessionStatistics.getOriginalFileSizeInMB() + " MB",
+                    "Original size: " + sessionStatistics.getOriginalFileSizeInMB() + " MB",
+                    "Size after modifiers: " + sessionStatistics.getModificationStatistics().getFileSizeAfterModifiers() + " MB",
                     "Modifiers: " + modifiersListStringBuilder,
                     "______________________________"
             );
