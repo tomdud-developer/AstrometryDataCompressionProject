@@ -84,7 +84,7 @@ public class CSV implements Transpositionable, Saveable {
 
             int row = 0;
             while(line != null) {
-                array[row] = line.split(",");
+                array[row] = splitByComma(line);//line.split(",");
                 line = bufferedReader.readLine();
                 row++;
             }
@@ -92,6 +92,20 @@ public class CSV implements Transpositionable, Saveable {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    private String[] splitByComma(String line) {
+        int begin = 0;
+        int columnIterator = 0;
+        String[] columns = new String[this.width];
+        for (int i = 0; i < line.length(); i++) {
+            if(line.charAt(i) == ',') {
+                columns[columnIterator] = line.substring(begin, i);
+                begin = i + 1;
+            }
+        }
+        columns[width-1] = line.substring(begin);
+        return columns;
     }
 
     private void initializeArrayLengthWidth() {

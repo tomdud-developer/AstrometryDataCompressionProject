@@ -45,7 +45,7 @@ public class StatisticsCSVPrinter implements Printable {
         writer.write(String.format("### Session ID: %s ###", sessionStatistics.getSESSION_ID()));
         writer.write("\n");
         writer.write("\n");
-
+        writeModificationStatistics(sessionStatistics.getModificationStatistics(), writer);
         writer.write("\n");
         writer.write("\n");
         writeCompressors(sessionStatistics.getCompressMethodList(), writer);
