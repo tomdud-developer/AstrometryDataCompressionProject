@@ -21,6 +21,15 @@ class CSVTest {
         Assertions.assertEquals(57, csv.getWidth());
         Assertions.assertEquals(65, csv.getHeight());
         Assertions.assertTrue(csv.isVertically());
+
+        String given = csv.getArray()[10][1];
+        Assertions.assertEquals("186575445220020736", given);
+
+        given = csv.getArray()[10][csv.getWidth() - 1];
+        Assertions.assertEquals("14.37592130852771", given);
+
+        given = csv.getArray()[csv.getHeight() - 1][csv.getWidth() - 1];
+        Assertions.assertEquals("14.413227562120605", given);
     }
 
     @Test

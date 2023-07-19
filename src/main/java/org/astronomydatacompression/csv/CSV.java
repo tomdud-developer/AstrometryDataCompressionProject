@@ -102,6 +102,7 @@ public class CSV implements Transpositionable, Saveable {
             if(line.charAt(i) == ',') {
                 columns[columnIterator] = line.substring(begin, i);
                 begin = i + 1;
+                columnIterator++;
             }
         }
         columns[width-1] = line.substring(begin);
