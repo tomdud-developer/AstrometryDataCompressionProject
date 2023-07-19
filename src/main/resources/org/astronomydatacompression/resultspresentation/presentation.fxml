@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -17,39 +19,58 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1500.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.astronomydatacompression.resultspresentation.JavaFxController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1642.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.astronomydatacompression.resultspresentation.JavaFxController">
    <children>
       <HBox prefHeight="800.0" prefWidth="1500.0">
          <children>
-            <AnchorPane prefHeight="800.0" prefWidth="245.0">
+            <AnchorPane prefHeight="800.0" prefWidth="350.0">
                <children>
-                  <VBox prefHeight="800.0" prefWidth="300.0">
+                  <VBox prefHeight="800.0" prefWidth="350.0">
                      <children>
-                        <Label alignment="CENTER" minWidth="60.0" prefHeight="40.0" prefWidth="302.0" style="&#10;" text="Astrometry Data Compression Project" textAlignment="CENTER" wrapText="false">
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="21.0" prefWidth="360.0" style="&#10;" text="Astrometry Data Compression Project" textAlignment="CENTER" wrapText="false">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" minWidth="60.0" prefHeight="27.0" prefWidth="286.0" style="&#10;" text="Version: V0.2" textAlignment="CENTER" wrapText="false" />
-                        <Label alignment="CENTER" minWidth="60.0" prefHeight="26.0" prefWidth="286.0" style="&#10;" text="Aurthor: Tomasz Dudzik" textAlignment="CENTER" wrapText="false" />
-                        <Separator prefHeight="32.0" prefWidth="286.0" />
-                        <Label alignment="CENTER" minWidth="60.0" prefHeight="26.0" prefWidth="286.0" style="&#10;" text="File to compress informations:" textAlignment="CENTER" wrapText="false">
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="365.0" style="&#10;" text="Version: V1.0" textAlignment="CENTER" wrapText="false" />
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="387.0" style="&#10;" text="Aurthor: Tomasz Dudzik" textAlignment="CENTER" wrapText="false" />
+                        <Separator prefHeight="32.0" prefWidth="286.0">
+                           <VBox.margin>
+                              <Insets top="20.0" />
+                           </VBox.margin></Separator>
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="356.0" style="&#10;" text="File to compress informations" textAlignment="CENTER" wrapText="false">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <ListView fx:id="inputFileInformationListView" prefHeight="86.0" prefWidth="286.0" />
-                        <Separator prefHeight="29.0" prefWidth="286.0" />
-                        <Label alignment="CENTER" minWidth="60.0" prefHeight="26.0" prefWidth="286.0" style="&#10;" text="Compressors list" textAlignment="CENTER" wrapText="false">
+                        <ListView fx:id="inputFileInformationListView" prefHeight="683.0" prefWidth="350.0" />
+                        <Separator prefHeight="34.0" prefWidth="343.0">
+                           <VBox.margin>
+                              <Insets top="20.0" />
+                           </VBox.margin></Separator>
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="359.0" style="&#10;" text="Modifiers shortcuts" textAlignment="CENTER" wrapText="false">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <ListView fx:id="compressorsInformationListView" prefHeight="179.0" prefWidth="286.0" />
-                        <AnchorPane prefHeight="329.0" prefWidth="300.0">
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="365.0" style="&#10;" text="TRANSPOSE = TS" textAlignment="CENTER" wrapText="false" />
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="387.0" style="&#10;" text="TRANSFORM_BOOLEANS = TB" textAlignment="CENTER" wrapText="false" />
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="365.0" style="&#10;" text="TRANSFORM_NOT_AVAILABLE = TNA" textAlignment="CENTER" wrapText="false" />
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="387.0" style="&#10;" text="TRANSFORM_SOLUTION_ID = TID" textAlignment="CENTER" wrapText="false" />
+                        <Separator prefHeight="29.0" prefWidth="286.0">
+                           <VBox.margin>
+                              <Insets top="20.0" />
+                           </VBox.margin></Separator>
+                        <Label alignment="CENTER" minWidth="60.0" prefHeight="17.0" prefWidth="359.0" style="&#10;" text="Compressors list" textAlignment="CENTER" wrapText="false">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <ListView fx:id="compressorsInformationListView" prefHeight="472.0" prefWidth="350.0" />
+                        <AnchorPane minHeight="100.0" prefHeight="143.0" prefWidth="350.0">
                            <children>
-                              <Button layoutX="29.0" layoutY="228.0" mnemonicParsing="false" onAction="#saveStatisticsButtonClick" prefHeight="43.0" prefWidth="242.0" text="Save Detailed Statistics to CSV" />
-                              <ImageView fitHeight="35.0" fitWidth="31.0" layoutX="39.0" layoutY="234.0" pickOnBounds="true" preserveRatio="true">
+                              <Button layoutX="54.0" layoutY="29.0" mnemonicParsing="false" onAction="#saveStatisticsButtonClick" prefHeight="43.0" prefWidth="242.0" text="Save Detailed Statistics to CSV" />
+                              <ImageView fitHeight="35.0" fitWidth="31.0" layoutX="54.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="C:\Users\tomas\IdeaProjects\AstrometryDataCompressionProject\src\main\resources\org\astronomydatacompression\resultspresentation\file-type-csv.png" />
                                  </image>
@@ -60,69 +81,116 @@
                   </VBox>
                </children>
             </AnchorPane>
-            <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" prefHeight="800.0" prefWidth="1200.0">
+            <AnchorPane prefHeight="800.0" prefWidth="1257.0">
                <children>
-                  <GridPane layoutY="3.0" prefHeight="800.0" prefWidth="1200.0">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <BarChart fx:id="compressionTimeBarChart" prefHeight="300.0" prefWidth="600.0" title="Compression time comparison">
-                          <xAxis>
-                            <CategoryAxis label="Compressors" side="BOTTOM" />
-                          </xAxis>
-                          <yAxis>
-                            <NumberAxis label="Compression time, s" side="LEFT" />
-                          </yAxis>
-                        </BarChart>
-                        <BarChart fx:id="compressedFileSizesBarChart" prefHeight="300.0" prefWidth="600.0" title="Compressed file sizes comparison" GridPane.rowIndex="1">
-                           <xAxis>
-                              <CategoryAxis label="Compressors" side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis label="Compressed file size, MB" side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                        <BarChart fx:id="decompressionSpeedBarChart" prefHeight="300.0" prefWidth="600.0" title="Decompression speeds comparison" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <xAxis>
-                              <CategoryAxis label="Compressors" side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis label="Speed, MBPS" side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                        <BarChart fx:id="decompressionTimeBarChart" prefHeight="377.0" prefWidth="600.0" title="Decompression time comparison" GridPane.rowIndex="2">
-                           <xAxis>
-                              <CategoryAxis label="Compressors" side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis label="Compression time, s" side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                        <BarChart fx:id="compressionRatioBarChart" prefHeight="300.0" prefWidth="600.0" title="Compression ratio comparison" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                           <xAxis>
-                              <CategoryAxis label="Compressors" side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis label="Compression ratio, s" side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                        <BarChart fx:id="compressionSpeedBarChart" prefHeight="300.0" prefWidth="600.0" title="Compression speeds comparison" GridPane.columnIndex="1">
-                           <xAxis>
-                              <CategoryAxis label="Compressors" side="BOTTOM" />
-                           </xAxis>
-                           <yAxis>
-                              <NumberAxis label="Speed, MBPS" side="LEFT" />
-                           </yAxis>
-                        </BarChart>
-                     </children>
-                  </GridPane>
+                  <ScrollPane prefHeight="800.0" prefWidth="1290.0">
+                     <content>
+                        <GridPane prefHeight="2400.0" prefWidth="1250.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <BarChart fx:id="compressionTimeBarChart" prefHeight="300.0" prefWidth="600.0" title="Compression time comparison">
+                                <xAxis>
+                                  <CategoryAxis label="Compressors" side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis label="Compression time, s" side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="compressedFileSizesBarChart" prefHeight="300.0" prefWidth="600.0" title="Compressed file sizes comparison" GridPane.rowIndex="1">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Compressed file size, MB" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="decompressionSpeedBarChart" prefHeight="300.0" prefWidth="600.0" title="Decompression speeds comparison" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Speed, MBPS" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="decompressionTimeBarChart" prefHeight="377.0" prefWidth="600.0" title="Decompression time comparison" GridPane.rowIndex="2">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Compression time, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="compressionRatioBarChart" prefHeight="300.0" prefWidth="600.0" title="Compression ratio comparison" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Compression ratio, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="compressionSpeedBarChart" prefHeight="300.0" prefWidth="600.0" title="Compression speeds comparison" GridPane.columnIndex="1">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Speed, MBPS" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="modificationAndCompressionTimeBarChart" prefHeight="377.0" prefWidth="600.0" title="Modification + compression time comparison" GridPane.rowIndex="3">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Time, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="reversalAndDecompressionTimeBarChart" prefHeight="377.0" prefWidth="600.0" title="Reversal + decompression time comparison" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Time, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="compressionAndDecompressionTimeBarChart" prefHeight="377.0" prefWidth="600.0" title="Compression + Decompression time comparison" GridPane.rowIndex="4">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Time, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="modificationAndCompressionAndDecompressionAndReversalTimeBarChart" prefHeight="377.0" prefWidth="600.0" title="Modification + Compression + Decompression + Reversal" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Time, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                              <BarChart fx:id="generalCompressionRatioBarChart" prefHeight="300.0" prefWidth="600.0" title="General compression ratio (orgFileSize / compressedFileSize)" GridPane.rowIndex="5">
+                                 <xAxis>
+                                    <CategoryAxis label="Compressors" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis label="Compression ratio, s" side="LEFT" />
+                                 </yAxis>
+                              </BarChart>
+                           </children>
+                        </GridPane>
+                     </content>
+                  </ScrollPane>
                </children>
             </AnchorPane>
          </children>

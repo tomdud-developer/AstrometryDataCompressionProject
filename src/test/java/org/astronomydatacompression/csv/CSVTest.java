@@ -21,6 +21,15 @@ class CSVTest {
         Assertions.assertEquals(57, csv.getWidth());
         Assertions.assertEquals(65, csv.getHeight());
         Assertions.assertTrue(csv.isVertically());
+
+        String given = csv.getArray()[10][1];
+        Assertions.assertEquals("186575445220020736", given);
+
+        given = csv.getArray()[10][csv.getWidth() - 1];
+        Assertions.assertEquals("14.37592130852771", given);
+
+        given = csv.getArray()[csv.getHeight() - 1][csv.getWidth() - 1];
+        Assertions.assertEquals("14.413227562120605", given);
     }
 
     @Test
@@ -57,4 +66,29 @@ class CSVTest {
     }
 
 
+    @Test
+    void testEquals() throws FileNotFoundException {
+        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
+        CSV csv = CSV.loadFromFile(file);
+
+        CSV modfifiedCSV = csv.transpose();
+        CSV demodifiedCSV = modfifiedCSV.transpose();
+
+        Assertions.assertTrue(csv.equals(csv));
+        Assertions.assertTrue(csv.equals(demodifiedCSV));
+        Assertions.assertTrue(demodifiedCSV.equals(csv));
+    }
+
+    @Test
+    void copy() throws FileNotFoundException {
+        File file = new File(getClass().getClassLoader().getResource("test.csv").getPath());
+        CSV csv = CSV.loadFromFile(file);
+
+        CSV copiedCSV = csv.copy();
+
+        Assertions.assertEquals(copiedCSV.getArray()[0][0], csv.getArray()[0][0]);
+        copiedCSV.getArray()[0][0] = "x";
+        Assertions.assertNotEquals(copiedCSV.getArray()[0][0], csv.getArray()[0][0]);
+
+    }
 }

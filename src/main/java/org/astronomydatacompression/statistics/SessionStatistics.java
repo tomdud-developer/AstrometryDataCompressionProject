@@ -18,14 +18,17 @@ public class SessionStatistics {
     private final List<DecompressionStatistics> decompressionStatistics;
     private final double originalFileSizeInMB;
     private final List<CompressMethod> compressMethodList;
+    private final ModificationStatistics modificationStatistics;
 
     public SessionStatistics(String SESSION_ID,
                              File originalFile,
+                             ModificationStatistics modificationStatistics,
                              List<CompressionStatistics> compressionStatistics,
                              List<DecompressionStatistics> decompressionStatistics,
                              List<CompressMethod> compressMethodList) {
         this.SESSION_ID = SESSION_ID;
         this.originalFile = originalFile;
+        this.modificationStatistics = modificationStatistics;
         this.compressionStatistics = compressionStatistics;
         this.decompressionStatistics = decompressionStatistics;
         this.compressMethodList = compressMethodList;

@@ -1,6 +1,7 @@
 package org.astronomydatacompression.statistics;
 
 import org.astronomydatacompression.compression.CompressMethod;
+import org.astronomydatacompression.csv.CSVModifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,16 +44,26 @@ class StatisticsCSVPrinterTest {
                 new DecompressionStatistics(CompressMethod.GZIP, testFile, 1234567L, testFile)
         );
 
+        ModificationStatistics modificationStatistics = new ModificationStatistics(
+                        testFile,
+                        123,
+                        123,
+                        123,
+                        List.of(CSVModifier.TRANSPOSE)
+                );
+
         List<SessionStatistics> sessionStatistics = List.of(
                 new SessionStatistics(
                         "TEST_SESSION_ID_1",
                         testFile,
+                        modificationStatistics,
                         compressionStatistics1,
                         decompressionStatistics1,
                         List.of(CompressMethod.M03, CompressMethod.MCM)),
                 new SessionStatistics(
                         "TEST_SESSION_ID_2",
                         testFile,
+                        modificationStatistics,
                         compressionStatistics2,
                         decompressionStatistics2,
                         List.of(CompressMethod.SEVEN_Z, CompressMethod.GZIP)

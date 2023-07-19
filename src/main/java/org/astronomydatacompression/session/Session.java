@@ -5,17 +5,19 @@ import org.astronomydatacompression.compression.CompressMethod;
 import org.astronomydatacompression.compression.FilesIntegrityChecker;
 import org.astronomydatacompression.csv.CSV;
 import org.astronomydatacompression.csv.CSVModifier;
+import org.astronomydatacompression.csv.DR1Transformer;
+import org.astronomydatacompression.csv.DR3Transformer;
 import org.astronomydatacompression.properties.PropertiesLoader;
 import org.astronomydatacompression.properties.PropertiesType;
 import org.astronomydatacompression.statistics.CompressionStatistics;
 import org.astronomydatacompression.statistics.DecompressionStatistics;
+import org.astronomydatacompression.statistics.ModificationStatistics;
 import org.astronomydatacompression.statistics.SessionStatistics;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -31,6 +33,7 @@ public class Session implements Runnable {
 
     private final String SESSION_ID;
     private Path workingDirectoryPath;
+    private File orgFileBeforeModifiers;
     private File fileToCompress;
     List<CompressMethod> methodsList;
     private final List<CompressionStatistics> compressionStatistics = new ArrayList<>();
@@ -38,6 +41,7 @@ public class Session implements Runnable {
     private final List<Compressor> compressors = new ArrayList<>();
     private List<CSVModifier> modifiersList;
     private SessionStatistics sessionStatistics;
+    private ModificationStatistics modificationStatistics;
 
     public Session() {
         SESSION_ID = generateSessionId();
@@ -67,7 +71,8 @@ public class Session implements Runnable {
     public void setFileToCompress(String fileNameToCompress) {
         try {
             Path filePathToCompress = Paths.get(workingDirectoryPath.toString(), fileNameToCompress);
-            fileToCompress = new File(filePathToCompress.toUri());
+            orgFileBeforeModifiers = new File(filePathToCompress.toUri());
+            fileToCompress = orgFileBeforeModifiers;
         } catch (InvalidPathException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
@@ -97,6 +102,8 @@ public class Session implements Runnable {
         copyFileToSessionDirectory();
         if(!modifiersList.isEmpty())
             modifyFileByModifiers();
+        else
+            this.modificationStatistics = new ModificationStatistics(orgFileBeforeModifiers, 0, 0, 0, modifiersList);
 
         System.out.println("Create Compression Threads.");
         List<Thread> threads = new ArrayList<>();
@@ -126,29 +133,97 @@ public class Session implements Runnable {
 
     private void modifyFileByModifiers() {
         try {
-            CSV orgCSV = CSV.loadFromFile(fileToCompress);
-            CSV modifiedCSV = applyModifiersChain(orgCSV);
-            String newFileName = "";
-            for (CSVModifier modifier : modifiersList)
-                newFileName += (modifier.name().substring(0,2) + "_");
+            CSV orgCSV = CSV.loadFromFile(orgFileBeforeModifiers);
 
-            newFileName += orgCSV.getFile().getName();
-            File savedFile = modifiedCSV.saveToFile(
-                    Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName));
-            modifiedCSV.setFile(savedFile);
+            DR1Transformer dr1Transformer = new DR1Transformer(orgCSV);
+            DR3Transformer dr3Transformer = new DR3Transformer(orgCSV);
+            long modifyStartTime = System.nanoTime();
+            CSV modifiedCSV = applyModifiersChain(orgCSV, dr1Transformer, dr3Transformer);
+            long modifyTime = System.nanoTime() - modifyStartTime;
 
-            fileToCompress = savedFile;
+            fileToCompress = createNewFileAfterModifiers(orgCSV, modifiedCSV);
+
+            long reversalStartTime = System.nanoTime();
+            CSV reversalCSV = applyReversalsChain(modifiedCSV, dr1Transformer, dr3Transformer);
+            long reversalTime = System.nanoTime() - reversalStartTime;
+
+            long checkEqualsStartTime = System.nanoTime();
+            if(!orgCSV.equals(reversalCSV))
+                throw new RuntimeException("CSV after reversals is not the same with original csv");
+            long checkEqualsTime = System.nanoTime() - checkEqualsStartTime;
+
+            this.modificationStatistics = new ModificationStatistics(fileToCompress, modifyTime, reversalTime, checkEqualsTime, modifiersList);
+
+            reversalCSV = null;
+            modifiedCSV = null;
+            orgCSV = null;
+            System.out.println(modificationStatistics);
+
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private CSV applyModifiersChain(CSV orgCSV) {
+    private CSV applyModifiersChain(CSV orgCSV, DR1Transformer dr1Transformer, DR3Transformer dr3Transformer) {
         CSV csv = orgCSV;
 
+        if(modifiersList.contains(CSVModifier.TRANSFORM_DR3_ALL)) {
+            csv = dr3Transformer.applyAllTransforms();
+            dr1Transformer.setModifiedCSV(csv);
+        }
+        if(modifiersList.contains(CSVModifier.TRANSFORM_BOOLEANS))
+            csv = dr1Transformer.transformBoolean();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
+            csv = dr1Transformer.transformNotAvailable();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
+            csv = dr1Transformer.transformID();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_REF_EPOCHS))
+            csv = dr1Transformer.transformRefEpochs();
         if(modifiersList.contains(CSVModifier.TRANSPOSE))
-            csv = orgCSV.transpose();
+            csv = csv.transpose();
 
+        dr1Transformer.setModifiedCSV(csv);
+        dr3Transformer.setModifiedCSV(csv);
+
+        return csv;
+    }
+
+    private File createNewFileAfterModifiers(CSV orgCSV, CSV modifiedCSV) {
+        StringBuilder newFileName = new StringBuilder();
+        for (CSVModifier modifier : modifiersList)
+            newFileName.append(modifier.getShortName()).append("_");
+
+        newFileName.append(orgCSV.getFile().getName());
+        File savedFile = modifiedCSV.saveToFile(
+                Paths.get(orgCSV.getFile().getParentFile().getPath(), newFileName.toString()));
+        modifiedCSV.setFile(savedFile);
+
+        return savedFile;
+    }
+
+    private CSV applyReversalsChain(CSV modifiedCSV, DR1Transformer dr1Transformer, DR3Transformer dr3Transformer) {
+        CSV csv = modifiedCSV;
+        dr1Transformer.setModifiedCSV(modifiedCSV);
+
+        if(modifiersList.contains(CSVModifier.TRANSPOSE)) {
+            csv = csv.transpose();
+            dr1Transformer.setModifiedCSV(csv);
+            dr3Transformer.setModifiedCSV(csv);
+        }
+        if(modifiersList.contains(CSVModifier.TRANSFORM_DR3_ALL)) {
+            csv = dr3Transformer.applyAllRevertTransforms();
+            dr1Transformer.setModifiedCSV(csv);
+        }
+        if(modifiersList.contains(CSVModifier.TRANSFORM_BOOLEANS))
+            csv = dr1Transformer.revertTransformBoolean();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_NOT_AVAILABLE))
+            csv = dr1Transformer.revertTransformNotAvailable();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_SOLUTION_ID))
+            csv = dr1Transformer.revertTransformID();
+        if(modifiersList.contains(CSVModifier.TRANSFORM_REF_EPOCHS))
+            csv = dr1Transformer.revertTransformRefEpochs();
+
+        dr3Transformer.setModifiedCSV(csv);
         return csv;
     }
 
@@ -160,14 +235,16 @@ public class Session implements Runnable {
             throw new RuntimeException(e);
         }
         fileToCompress = copiedFilePath.toFile();
+        orgFileBeforeModifiers = fileToCompress;
     }
 
     private void generateSessionStatistics() {
          sessionStatistics = new SessionStatistics(
-                SESSION_ID,
-                fileToCompress,
-                compressionStatistics,
-                decompressionStatistics,
+                 SESSION_ID,
+                 orgFileBeforeModifiers,
+                 modificationStatistics,
+                 compressionStatistics,
+                 decompressionStatistics,
                  compressors.stream().map(Compressor::getMethod).toList()
          );
     }
@@ -222,7 +299,8 @@ public class Session implements Runnable {
                         Your session ID is %s
                         Working directory: %s
                         File for compressor: %s
-                        Chosen Methods: %s""",
+                        Chosen Methods: %s
+                        """,
                 SESSION_ID, workingDirectoryPath, fileToCompress.getPath(),
                 methodsList.stream().map(Enum::toString).reduce((info, x) -> info += (x + " ") ).get()
         );
