@@ -1,6 +1,6 @@
 # GAIA Astrometry Data Compressors Comparision
 
-Project obtain to compare different compressors used on GAIA astrometry data. Data are represted in CSV files, one file contain aobut 300000 rows and 57 columns, weight is about 100MB with 5MB variance.
+Project obtain to compare different compressors used on GAIA astrometry data. Compressors has been applied for DR1 and DR3 GAIA data. DR1 and DR3 are represented in CSV files, DR1 contain about 300000 rows and 57 columns, weight is about 100MB. DR3 contain about 500000 rows and 152 columns, weight is about 600MB.
 
 Compressors list:
 - 7ZIP
@@ -11,12 +11,80 @@ Compressors list:
 - PPMD
 - ZSTD
 
-
-## Documentation
-
-![Diagram.svg](assets%2FDiagram.svg)
 ![main_screenshot.png](assets%2Fmain_screenshot.png)
 
+## Results
+![TransformationsComparison.png](assets%2Fresults%2FTransformationsComparison.png)
+![DRR3_TransformationsComparison.png](assets%2Fresults%2FDRR3_TransformationsComparison.png)
+
+## Documentation
+![Diagram.svg](assets%2FDiagram.svg)
+
+## Configuration external.properties
+```
+#This is a folder where sessions will be created, in this folder should be also files to compress
+session.WorkingDirectoryPath=E:\\Workspace
+
+
+#Available transformations: TRANSPOSE,TRANSFORM_BOOLEANS,TRANSFORM_NOT_AVAILABLE,TRANSFORM_SOLUTION_ID,TRANSFORM_REF_EPOCHS
+session.fileNameToCompress[0]=GaiaSource_690706-690770.csv
+session.fileToCompressModifiers[0]=TRANSFORM_DR3_ALL
+session.fileNameToCompress[1]=GaiaSource_690706-690770.csv
+session.fileToCompressModifiers[1]=TRANSPOSE
+session.fileNameToCompress[2]=GaiaSource_690706-690770.csv
+session.fileToCompressModifiers[2]=TRANSPOSE,TRANSFORM_DR3_ALL
+session.fileNameToCompress[3]=GaiaSource_690706-690770.csv
+session.fileToCompressModifiers[3]=
+
+#Sessions are running one after another, but in session you can run all compressors parallel
+session.isShouldBeParallelComputing=false
+
+#Available compressors: PPMD,M03,BSC,GZIP,MCM,ZSTD,SEVEN_Z
+session.methods=PPMD,BSC,GZIP,MCM,ZSTD,SEVEN_Z
+
+#You should provide compressors executable files
+compressors.directory=C:\\Users\\tomas\\IdeaProjects\\AstrometryDataCompressionProject\\Compressors
+
+compressors.bsc.folderName=bsc
+compressors.bsc.executableFileName=bsc.exe
+compressors.bsc.defaultExtension=
+compressors.bsc.compressCommand=e
+compressors.bsc.options[0]=-b100
+
+compressors.ppmd.folderName=ppmdi2
+compressors.ppmd.executableFileName=PPMd.exe
+compressors.ppmd.defaultExtension=ppmd
+compressors.ppmd.compressCommand=e
+compressors.ppmd.options[0]=-d
+
+compressors.m03.folderName=m03
+compressors.m03.executableFileName=M03.exe
+compressors.m03.defaultExtension=
+compressors.m03.compressCommand=e
+compressors.m03.blockSize=1000
+
+compressors.gzip.folderName=gzip
+compressors.gzip.executableFileName=gzip.exe
+compressors.gzip.defaultExtension=gz
+
+compressors.mcm.folderName=mcm83
+compressors.mcm.executableFileName=mcm.exe
+compressors.mcm.defaultExtension=mcm
+compressors.mcm.options[0]=-m5
+
+compressors.zstd.folderName=zstd-v1.5.5-win64
+compressors.zstd.executableFileName=zstd.exe
+compressors.zstd.defaultExtension=zst
+compressors.zstd.options[0]=-k
+compressors.zstd.options[1]=-o
+
+compressors.7z.folderName=xz-5.2.1-windows/bin_x86-64
+compressors.7z.executableFileName=xz.exe
+compressors.7z.defaultExtension=xz
+compressors.7z.compressCommand=-z
+compressors.7z.options[0]=
+compressors.7z.options[1]=
+```
 
 
 ## Authors
