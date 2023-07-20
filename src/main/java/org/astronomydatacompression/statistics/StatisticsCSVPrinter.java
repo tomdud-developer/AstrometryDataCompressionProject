@@ -125,9 +125,6 @@ public class StatisticsCSVPrinter implements Printable {
         stringBuilder.append("\nDecompressionSpeedInMBPS,");
         decompressionStatistics.stream().map(DecompressionStatistics::getDecompressionSpeedInMBPS).forEach(s->stringBuilder.append(s).append(","));
 
-        stringBuilder.append("\nCompressionSpeedInMBPS,");
-        decompressionStatistics.stream().map(DecompressionStatistics::getDecompressionTimeInSeconds).forEach(s->stringBuilder.append(s).append(","));
-
         stringBuilder.append("\nDecompressionTimeInSeconds,");
         decompressionStatistics.stream().map(DecompressionStatistics::getDecompressionTimeInSeconds).forEach(s->stringBuilder.append(s).append(","));
 
