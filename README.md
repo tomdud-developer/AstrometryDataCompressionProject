@@ -14,6 +14,24 @@ Compressors list:
 ![main_screenshot.png](assets%2Fmain_screenshot.png)
 
 ## Results
+### Compression Statistics ###
+
+| Compression Algorithm    | PPMD         | BSC          | GZIP         | MCM          | ZSTD         | SEVEN_Z      |
+|-------------------------|--------------|--------------|--------------|--------------|--------------|--------------|
+| CompressionRatio        | 3.288843074  | 3.141901834  | 2.635741022  | 3.581796524  | 2.518680151  | 3.045410099  |
+| OutputSizeInMB          | 148.612007   | 155.56233    | 185.436113   | **136.457101**   | 194.05464    | 160.491216   |
+| CompressionSpeedInMBPS  | 21.73072611  | 25.37483388  | 12.49176537  | 3.338762761  | **126.6392352**  | 1.337527649  |
+| CompressionTimeInSeconds| 22.4917275   | 19.2616658   | 39.1267011   | 146.3900268  | **3.8594798**    | 365.4216572  |
+| General compression ratio| 4.398091118  | 4.201590115  | 3.524713377  | **4.789850753**  | 3.368170676  | 4.072554027  |
+
+### Decompression Statistics ###
+
+| Decompression Algorithm   | PPMD         | BSC          | GZIP         | MCM          | ZSTD         | SEVEN_Z      |
+|---------------------------|--------------|--------------|--------------|--------------|--------------|--------------|
+| DecompressedFileInMB      | 488.76157    | 488.76157    | 488.76157    | 488.76157    | 488.76157    | 488.76157    |
+| DecompressionSpeedInMBPS  | 6.858963052  | 13.39538258  | 25.3854268   | 0.92925591   | **37.28734186**  | 12.53633204  |
+| DecompressionTimeInSeconds| 21.666833    | 11.6131308   | 7.3048255    | 146.8455563  | **5.2043034**    | 12.8020872   |
+
 ![TransformationsComparison.png](assets%2Fresults%2FTransformationsComparison.png)
 ![DRR3_TransformationsComparison.png](assets%2Fresults%2FDRR3_TransformationsComparison.png)
 
