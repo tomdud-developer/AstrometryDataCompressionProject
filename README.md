@@ -11,10 +11,9 @@ Compressors list:
 - PPMD
 - ZSTD
 
-![main_screenshot.png](assets%2Fmain_screenshot.png)
-
 ## Results
-### Compression Statistics ###
+
+### Compression Statistics DR3 GAIA for using all transformations and transposition ###
 
 | Compression Algorithm    | PPMD         | BSC          | GZIP         | MCM          | ZSTD         | SEVEN_Z      |
 |-------------------------|--------------|--------------|--------------|--------------|--------------|--------------|
@@ -24,7 +23,7 @@ Compressors list:
 | CompressionTimeInSeconds| 22.4917275   | 19.2616658   | 39.1267011   | 146.3900268  | **3.8594798**    | 365.4216572  |
 | General compression ratio| 4.398091118  | 4.201590115  | 3.524713377  | **4.789850753**  | 3.368170676  | 4.072554027  |
 
-### Decompression Statistics ###
+### Decompression Statistics DR3 GAIA ###
 
 | Decompression Algorithm   | PPMD         | BSC          | GZIP         | MCM          | ZSTD         | SEVEN_Z      |
 |---------------------------|--------------|--------------|--------------|--------------|--------------|--------------|
@@ -32,7 +31,10 @@ Compressors list:
 | DecompressionSpeedInMBPS  | 6.858963052  | 13.39538258  | 25.3854268   | 0.92925591   | **37.28734186**  | 12.53633204  |
 | DecompressionTimeInSeconds| 21.666833    | 11.6131308   | 7.3048255    | 146.8455563  | **5.2043034**    | 12.8020872   |
 
+### DR1 GAIA ###
 ![TransformationsComparison.png](assets%2Fresults%2FTransformationsComparison.png)
+
+### DR3 GAIA ###
 ![DRR3_TransformationsComparison.png](assets%2Fresults%2FDRR3_TransformationsComparison.png)
 
 ## Documentation
@@ -104,13 +106,10 @@ compressors.7z.options[0]=
 compressors.7z.options[1]=
 ```
 
-
 ## Authors
-
 - [@tomadud-developer](https://www.github.com/tomadud-developer)
 
 
 ## License
-
 [MIT](https://choosealicense.com/licenses/mit/)
 
