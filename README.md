@@ -1,4 +1,4 @@
-# GAIA Astrometry Data Compressors Comparision
+# GAIA Astrometry Data Compressors Comparison
 
 Project obtain to compare different compressors used on GAIA astrometry data. Compressors has been applied for DR1 and DR3 GAIA data. DR1 and DR3 are represented in CSV files, DR1 contain about 300000 rows and 57 columns, weight is about 100MB. DR3 contain about 500000 rows and 152 columns, weight is about 600MB.
 
