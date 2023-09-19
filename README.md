@@ -55,9 +55,11 @@ The program provides following transformations:
 - TRANSFORM_BOOLEANS
 - TRANSFORM_NOT_AVAILABLE
 - TRANSFORM_SOLUTION_ID
+- DESIGNATION_TRANSFORM
 - TRANSFORM_REF_EPOCHS
+- TRANSFORM_NULL
 
-The Java program loads all cells from a file into memory, storing them in a common array, enabling efficient access and manipulation of the data.
+The Java program loads all cells from a file into memory, storing them in a common array, enabling efficient access and manipulation of the data. **Disadvantage of this solutions is increased memory consumption.**
 ```java
 public class CSV implements Transpositionable, Saveable {
     private File file;
@@ -73,33 +75,171 @@ public class CSV implements Transpositionable, Saveable {
 It changes row with columns. That's helpful for compressions algorithms, because one row contains similar columns.
 The CSV class implements Transpositionable interface. The transpose() method generate new CSV object.
 ```java
-    @Override
-    public CSV transpose() {
-        CSV transposedCSV = new CSV();
+@Override
+public CSV transpose() {
+    CSV transposedCSV = new CSV();
 
-        String[][] transposedArray = new String[width][height];
+    String[][] transposedArray = new String[width][height];
 
-        for (int row = 0; row < height; row++)
-            for (int col = 0; col < width; col++)
-                transposedArray[col][row] = array[row][col];
+    for (int row = 0; row < height; row++)
+        for (int col = 0; col < width; col++)
+            transposedArray[col][row] = array[row][col];
 
-        transposedCSV.setArray(transposedArray);
-        transposedCSV.width = height;
-        transposedCSV.height = width;
-        transposedCSV.isVertically = !isVertically;
+    transposedCSV.setArray(transposedArray);
+    transposedCSV.width = height;
+    transposedCSV.height = width;
+    transposedCSV.isVertically = !isVertically;
 
-        return transposedCSV;
-    }
+    return transposedCSV;
+}
 ```
 
 ### TRANSFORM_BOOLEANS
+In DR1 data there is a two columns with 'true' and 'false' values. In DR3 data there is about 14 columns. The transform function replace all 'true'
+ and 'false' on binary 01 flag.
 
+For DR1 data:
+```java
+@Override
+public CSV revertTransformBoolean() {
+    checkVerticality(transformedCSV);
 
+    String[][] arr = transformedCSV.getArray();
 
+    for (int i = 1; i < transformedCSV.getHeight(); i++) {
+    if(arr[i][astrometric_primary_flag_column].equals("1"))
+    arr[i][astrometric_primary_flag_column] = "true";
+    else if(arr[i][astrometric_primary_flag_column].equals("0"))
+    arr[i][astrometric_primary_flag_column] = "false";
 
+    if(arr[i][duplicated_source_column].equals("1"))
+    arr[i][duplicated_source_column] = "true";
+    else if(arr[i][duplicated_source_column].equals("0"))
+    arr[i][duplicated_source_column] = "false";
+    }
 
+    return transformedCSV;
+}
+```
+### TRANSFORM_NOT_AVAILABLE
+Any cell in DR1 and DR2 can contain "NOT_AVAILABLE" string, it is replace on '?' character
 
+```java
+@Override
+public CSV transformNotAvailable() {
+    checkVerticality(transformedCSV);
 
+    String[][] arr = transformedCSV.getArray();
+
+    for (int i = 1; i < transformedCSV.getHeight(); i++) {
+        if(arr[i][phot_variable_flag_column].equals(not_available_string))
+            arr[i][phot_variable_flag_column] = "?";
+    }
+
+    return transformedCSV;
+}
+```
+
+### TRANSFORM_SOLUTION_ID
+This is a unique ID for file and repeat in every row for **solution_id** column in DR1 and DR3. **solution_id** can be deleted for each row except first.
+```java
+@Override
+public CSV transformID() {
+        checkVerticality(transformedCSV);
+
+        String[][] arr = transformedCSV.getArray();
+        solutionID = arr[1][0];
+
+        for (int i = 1; i < transformedCSV.getHeight(); i++) {
+        arr[i][solution_id_column] = "";
+        }
+
+        return transformedCSV;
+}
+```
+
+### DESIGNATION_TRANSFORM
+In DR3, there is a designation column with format "Gaia DR3 4295806720". "Gaia DR3 " from this string can be deleted. 
+```java
+public CSV transformDesignation() {
+    checkVerticality(transformedCSV);
+
+    String[][] arr = transformedCSV.getArray();
+    designationString = arr[1][designation_column].split(" ")[0] + " " + arr[1][designation_column].split(" ")[1];
+
+    for (int i = 1; i < transformedCSV.getHeight(); i++) {
+        arr[i][designation_column] = "";
+    }
+
+    return transformedCSV;
+}
+```
+### TRANSFORM_GSPPHOT
+The DR3 contains column **libname_gspphot**, which can contains "MARCS", "PHOENIX", "OB" or "null" strings, it is mapped by dictionary to short form.
+```java
+public CSV transformGspphotByDictionary() {
+    checkVerticality(transformedCSV);
+
+    String[][] arr = transformedCSV.getArray();
+
+    for (int i = 1; i < transformedCSV.getHeight(); i++) {
+        String str = gspphotDictionary.get(arr[i][libname_gspphot_column]);
+        if(str != null) {
+            arr[i][libname_gspphot_column] = str;
+        }
+    }
+
+    return transformedCSV;
+}
+```
+Dictionary:
+```java
+    gspphotDictionary = new HashMap<>();
+    gspphotDictionary.put("\"MARCS\"", "M");
+    gspphotDictionary.put("\"PHOENIX\"", "P");
+    gspphotDictionary.put("\"OB\"", "O");
+
+    gspphotDictionary.put("M", "\"MARCS\"");
+    gspphotDictionary.put("P", "\"PHOENIX\"");
+    gspphotDictionary.put("O", "\"OB\"");
+```
+
+### TRANSFORM_REF_EPOCHS
+In DR1 and DR3 there is a **ref_epochs** column with a year of data collection, it is the same in each row. The rule is similar in TRANSFORM_SOLUTION_ID.
+```java
+@Override
+public CSV transformRefEpochs() {
+    checkVerticality(transformedCSV);
+
+    String[][] arr = transformedCSV.getArray();
+    refEpochs = arr[1][ref_epochs_column];
+
+    for (int i = 1; i < transformedCSV.getHeight(); i++) {
+        arr[i][ref_epochs_column] = "";
+    }
+
+    return transformedCSV;
+}
+```
+
+### TRANSFORM_NULL
+In DR3 there are a lot of "null" strings, which can be deleted and be empty. In average, per file there is a 22_000_000 "null" strings. Common file contains 80_000_00 cells. This is about 1/4 of all cells.
+
+```java
+public CSV transformNull() {
+    checkVerticality(transformedCSV);
+
+    String[][] arr = transformedCSV.getArray();
+
+    for (int i = 1; i < transformedCSV.getHeight(); i++)
+        for (int j = 0; j < transformedCSV.getWidth(); j++) {
+            if(arr[i][j].equals("null"))
+                arr[i][j] = "";
+        }
+
+    return transformedCSV;
+}
+```
 ____________________________
 # Results
 
