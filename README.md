@@ -11,7 +11,97 @@ Compressors list:
 - PPMD
 - ZSTD
 
-## Results
+# Documentation
+Application allow to define files for process. Single **process** can run multiple **sessions**. Each session can be
+created with different files and different modifications. User can define files and modifications in **external.properties** file.
+The main flow of the program is presented below. 
+![Diagram.svg](assets%2FDiagram.svg)
+
+## Session
+The session has following stages:
+1. Read original file
+2. Make transformations
+3. Compression by defined methods
+4. Decompression
+5. Make reversal transformations
+6. Check integrity
+7. Generate statistics
+
+## Statistics
+Each session generates statistics and sends them to presentation layer.
+Session's statistics contains information about used compression methods and compression and decompression statistics.
+
+### Compression statistics
+- CompressionRatio (Compared to file **after** transformations)
+- OutputSizeInMB 
+- CompressionSpeedInMBPS 
+- CompressionTimeInSeconds 
+- General compression ratio (Compared to original file, **before** transformations)
+
+### Decompression statistics
+- DecompressedFileInMB
+- DecompressionSpeedInMBPS
+- DecompressionTimeInSeconds
+
+### Transformations statistics
+- modificationTimeInSeconds
+- reversalTimeInSeconds
+- checkEqualsTimeInSeconds
+
+
+## Transformations
+The program provides following transformations:
+- TRANSPOSE
+- TRANSFORM_BOOLEANS
+- TRANSFORM_NOT_AVAILABLE
+- TRANSFORM_SOLUTION_ID
+- TRANSFORM_REF_EPOCHS
+
+The Java program loads all cells from a file into memory, storing them in a common array, enabling efficient access and manipulation of the data.
+```java
+public class CSV implements Transpositionable, Saveable {
+    private File file;
+    private String[][] array;
+    private int width;
+    private int height;
+    
+    ...
+}
+```
+
+### TRANSPOSE
+It changes row with columns. That's helpful for compressions algorithms, because one row contains similar columns.
+The CSV class implements Transpositionable interface. The transpose() method generate new CSV object.
+```java
+    @Override
+    public CSV transpose() {
+        CSV transposedCSV = new CSV();
+
+        String[][] transposedArray = new String[width][height];
+
+        for (int row = 0; row < height; row++)
+            for (int col = 0; col < width; col++)
+                transposedArray[col][row] = array[row][col];
+
+        transposedCSV.setArray(transposedArray);
+        transposedCSV.width = height;
+        transposedCSV.height = width;
+        transposedCSV.isVertically = !isVertically;
+
+        return transposedCSV;
+    }
+```
+
+### TRANSFORM_BOOLEANS
+
+
+
+
+
+
+
+____________________________
+# Results
 
 ### Compression Statistics DR3 GAIA for using all transformations and transposition ###
 
@@ -37,8 +127,6 @@ Compressors list:
 ### DR3 GAIA ###
 ![DRR3_TransformationsComparison.png](assets%2Fresults%2FDRR3_TransformationsComparison.png)
 
-## Documentation
-![Diagram.svg](assets%2FDiagram.svg)
 
 ## Configuration external.properties
 ```
